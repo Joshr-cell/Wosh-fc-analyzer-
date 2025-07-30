@@ -1,61 +1,47 @@
 import streamlit as st
-import pandas as pd
+import pyttsx3
 from datetime import date
-import base64
+import pandas as pd
 
-# --- PAGE CONFIG ---
+# --- Streamlit Config ---
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
 
-# --- BACKGROUND IMAGE SETUP ---
-def set_background(image_file):
-    with open(image_file, "rb") as img_file:
-        encoded_string = base64.b64encode(img_file.read()).decode()
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/jpeg;base64,{encoded_string}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# --- Voice Assistant Function ---
+def speak_text(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
 
-# --- CALL BACKGROUND FUNCTION ---
-set_background("background.jpeg")  # Make sure the image is in the same folder and renamed
+# --- Speak Welcome Message ---
+speak_text("Welcome to Wosh FC Analyzer. From the streets to the stars.")
 
-# --- HEADER ---
-st.image("background.jpeg", width=150)  # Logo at the top
+# --- App Title and Tagline ---
 st.title("⚽ Wosh FC Analyzer")
 st.markdown("From the streets to the stars 🌟")
 
-# --- PRELOADED PLAYER DATA ---
+# --- Player Data ---
 players = [
-    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Play for Arsenal"},
-    {"Name": "Willy", "Position": "Defender", "Traits": "Aggressive, Reliable", "Ambition": "Become national team player"},
-    {"Name": "Sammy", "Position": "Winger", "Traits": "Fast, Creative", "Ambition": "Play in Europe"},
-    {"Name": "Branton", "Position": "Striker", "Traits": "Clinical, Agile", "Ambition": "Top scorer in Kenya"},
-    {"Name": "Samson", "Position": "Midfielder", "Traits": "Hardworking, Calm", "Ambition": "Coach youth football"},
-    {"Name": "Pasi", "Position": "Goalkeeper", "Traits": "Brave, Vocal", "Ambition": "Best GK in Africa"},
-    {"Name": "Ole", "Position": "Defender", "Traits": "Disciplined, Powerful", "Ambition": "Play for Gor Mahia"},
-    {"Name": "Byron", "Position": "Striker", "Traits": "Strong, Fearless", "Ambition": "Captain Wosh FC"},
-    {"Name": "Munene", "Position": "Midfielder", "Traits": "Creative, Fast", "Ambition": "Represent Kenya"},
-    {"Name": "Victor", "Position": "Winger", "Traits": "Skillful, Visionary", "Ambition": "Play in La Liga"},
-    {"Name": "Mose", "Position": "Defender", "Traits": "Tactical, Brave", "Ambition": "Coach defenders"},
-    {"Name": "Jamo", "Position": "Goalkeeper", "Traits": "Flexible, Aggressive", "Ambition": "Top youth GK"}
+    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Play for Barcelona"},
+    {"Name": "Willy", "Position": "Defender", "Traits": "Strong, Reliable", "Ambition": "Captain Kenya National Team"},
+    {"Name": "Sammy", "Position": "Striker", "Traits": "Quick, Sharp", "Ambition": "Top scorer in Europe"},
+    {"Name": "Branton", "Position": "Goalkeeper", "Traits": "Agile, Brave", "Ambition": "Play in the Premier League"},
+    {"Name": "Samson", "Position": "Winger", "Traits": "Fast, Creative", "Ambition": "Become a global star"},
+    {"Name": "Pasi", "Position": "Midfielder", "Traits": "Tactical, Calm", "Ambition": "Coach youth players"},
+    {"Name": "Ole", "Position": "Defender", "Traits": "Disciplined, Tall", "Ambition": "Study in Europe"},
+    {"Name": "Byron", "Position": "Forward", "Traits": "Skillful, Focused", "Ambition": "Play for PSG"},
+    {"Name": "Munene", "Position": "Utility", "Traits": "Flexible, Hard-working", "Ambition": "Be a mentor"},
+    {"Name": "Victor", "Position": "Striker", "Traits": "Accurate, Powerful", "Ambition": "Be the best"},
+    {"Name": "Mose", "Position": "Defender", "Traits": "Smart, Brave", "Ambition": "Join Kenya Police FC"},
+    {"Name": "Jamo", "Position": "Winger", "Traits": "Energetic, Determined", "Ambition": "Get a scholarship"}
 ]
 
 df = pd.DataFrame(players)
 
-# --- DISPLAY PLAYER DATA ---
-st.subheader("📋 Player Profiles")
+# --- Display Data ---
+st.subheader("🌟 Player Profiles")
 st.dataframe(df, use_container_width=True)
 
-# --- DATE ---
-st.caption(f"📅 Last updated on: {date.today()}")
-
-
+# --- Voice Feedback Button ---
+if st.button("🔊 Say All Player Names"):
+    names = ", ".join(player["Name"] for player in players)
+    speak_text(f"The players are: {names}")
