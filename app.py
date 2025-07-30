@@ -1,15 +1,11 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 from datetime import date
-
 # --- Streamlit Page Config ---
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
-
 # --- HEADER ---
 st.title("⚽ Wosh FC Analyzer")
 st.markdown("#### From the Streets to the Stars 🌟")
-
 # --- SAMPLE PLAYER DATA ---
 players = [
     {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Play for Barcelona", "Strength": 85, "Discipline": 88},
@@ -18,11 +14,9 @@ players = [
     {"Name": "Branton", "Position": "Winger", "Traits": "Fast, Creative", "Ambition": "EPL", "Strength": 80, "Discipline": 85},
     {"Name": "Ole", "Position": "Striker", "Traits": "Powerful, Composed", "Ambition": "Golden Boot", "Strength": 88, "Discipline": 84},
 ]
-
 # --- SIDEBAR MENU ---
 selected_player = st.sidebar.selectbox("Select Player", [player["Name"] for player in players])
 st.sidebar.markdown("Made by Wosh FC ❤️")
-
 # --- DISPLAY PLAYER DETAILS ---
 player = next(p for p in players if p["Name"] == selected_player)
 
