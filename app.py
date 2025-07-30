@@ -1,121 +1,69 @@
 import streamlit as st
 import pandas as pd
-from datetime import date
+import pyttsx3
 import base64
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
 
-# --- FUNCTION TO SET BACKGROUND IMAGE ---
+# --- VOICE ASSISTANT SETUP ---
+engine = pyttsx3.init()
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+# --- SET BACKGROUND IMAGE ---
 def set_background(image_file):
     with open(image_file, "rb") as file:
-        img_bytes = file.read()
-        b64_img = base64.b64encode(img_bytes).decode()
-        css_code = f"""
+        encoded = base64.b64encode(file.read()).decode()
+    st.markdown(
+        f"""
         <style>
         .stApp {{
-            background-image: url("data:image/jpeg;base64,{b64_img}");
+            background-image: url("data:image/jpeg;base64,{encoded}");
             background-size: cover;
-            background-position: center;
             background-repeat: no-repeat;
+            background-attachment: fixed;
         }}
         </style>
-        """
-        st.markdown(css_code, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
-# --- SET BACKGROUND ---
-set_background("WhatsApp Image 2025-07-24 at 10.55.21 AM (5).jpeg")
+set_background("background.jpeg")  # ✅ Make sure this file exists in the same folder
 
-# --- HEADER ---
-st.image("WhatsApp Image 2025-07-24 at 10.55.21 AM (5).jpeg", width=150)
+# --- HEADER WITH LOGO ---
+st.image("background.jpeg", width=100)  # You can replace with a logo if different
 st.title("⚽ Wosh FC Analyzer")
 st.markdown("From the streets to the stars 🌟")
 
-# --- SIDEBAR NAVIGATION ---
-menu = st.sidebar.selectbox(
-    "Navigation",
-    ["🏠 Home", "👤 Player Profiles", "📊 Team Stats", "📅 Match History", "🏋️ Training Suggestions"]
-)
-
-# --- DATA ---
-players = [
-    {"Name": "Ian", "Position": "Midfielder", "Age": 14, "Goals": 4, "Assists": 5, "Fitness": 80, "Traits": "Visionary, Calm"},
-    {"Name": "Willy", "Position": "Forward", "Age": 13, "Goals": 7, "Assists": 3, "Fitness": 88, "Traits": "Pacy, Sharp finisher"},
-    {"Name": "Sammy", "Position": "Defender", "Age": 14, "Goals": 1, "Assists": 1, "Fitness": 90, "Traits": "Tactical, Brave"},
-    {"Name": "Branton", "Position": "Goalkeeper", "Age": 13, "Goals": 0, "Assists": 0, "Fitness": 92, "Traits": "Shot-stopper"},
-    {"Name": "Victor", "Position": "Midfielder", "Age": 14, "Goals": 3, "Assists": 4, "Fitness": 84, "Traits": "Creative, Agile"},
+# --- SAMPLE PLAYER DATA ---
+player_data = [
+    {"Name": "Ian", "Position": "Midfielder", "Goals": 3, "Assists": 2, "Speed": 7},
+    {"Name": "Willy", "Position": "Defender", "Goals": 1, "Assists": 1, "Speed": 5},
+    {"Name": "Sammy", "Position": "Striker", "Goals": 5, "Assists": 3, "Speed": 8},
 ]
-player_df = pd.DataFrame(players)
 
-# --- HOME ---
-if menu == "🏠 Home":
-    st.subheader("Welcome to Wosh FC Analyzer")
-    st.markdown("This platform empowers Wosh FC players by analyzing stats, tracking progress, and offering training suggestions.")
+player_df = pd.DataFrame(player_data)
 
-# --- PLAYER PROFILES ---
-elif menu == "👤 Player Profiles":
-    st.subheader("Player Profiles")
-    selected_player = st.selectbox("Select Player", player_df["Name"])
-    player_info = player_df[player_df["Name"] == selected_player].iloc[0]
+# --- DISPLAY PLAYER STATS ---
+st.subheader("📊 Player Stats")
+fig = px.bar(player_df, x="Name", y="Goals", color="Position", title="Top Scorers")
+st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown(f"**Name:** {player_info['Name']}")
-    st.markdown(f"**Position:** {player_info['Position']}")
-    st.markdown(f"**Age:** {player_info['Age']}")
-    st.markdown(f"**Goals:** {player_info['Goals']}")
-    st.markdown(f"**Assists:** {player_info['Assists']}")
-    st.markdown(f"**Fitness Level:** {player_info['Fitness']}%")
-    st.markdown(f"**Traits:** {player_info['Traits']}")
+# --- SELECT PLAYER TO VIEW DETAILS ---
+selected_player = st.selectbox("Choose a player to view details", player_df["Name"])
+player_details = player_df[player_df["Name"] == selected_player].iloc[0]
+st.write(f"**Position:** {player_details['Position']}")
+st.write(f"**Goals:** {player_details['Goals']}")
+st.write(f"**Assists:** {player_details['Assists']}")
+st.write(f"**Speed:** {player_details['Speed']}")
 
-# --- TEAM STATS ---
-elif menu == "📊 Team Stats":
-    st.subheader("Team Performance Statistics")
+# --- VOICE ASSISTANT TRIGGER ---
+if st.button("🎙 Speak Player Stats"):
+    text = f"{selected_player} plays as a {player_details['Position']} with {player_details['Goals']} goals and {player_details['Assists']} assists."
+    speak(text)
 
-    st.markdown("### Goals by Player")
-    fig = px.bar(player_df, x="Name", y="Goals", color="Position", title="Top Scorers")
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown("### Fitness Overview")
-    fig2 = px.line(player_df, x="Name", y="Fitness", markers=True, title="Player Fitness Levels")
-    st.plotly_chart(fig2, use_container_width=True)
-
-# --- MATCH HISTORY ---
-elif menu == "📅 Match History":
-    st.subheader("Match History")
-    match_data = {
-        "Date": ["2025-07-01", "2025-07-15", "2025-07-20"],
-        "Opponent": ["Zorphar SC", "Makadara United", "Young Stars"],
-        "Result": ["2-1 W", "0-2 L", "3-3 D"],
-        "Man of the Match": ["Willy", "Victor", "Ian"]
-    }
-    match_df = pd.DataFrame(match_data)
-    st.table(match_df)
-
-# --- TRAINING SUGGESTIONS ---
-elif menu == "🏋️ Training Suggestions":
-    st.subheader("AI Training Suggestions")
-
-    selected_player = st.selectbox("Choose Player", player_df["Name"], key="training")
-    player_info = player_df[player_df["Name"] == selected_player].iloc[0]
-
-    st.markdown(f"### For {selected_player}")
-    if player_info["Position"] == "Forward":
-        st.markdown("- Improve shooting accuracy")
-        st.markdown("- Sprint drills and agility")
-    elif player_info["Position"] == "Midfielder":
-        st.markdown("- Vision and passing accuracy")
-        st.markdown("- Long-range shooting")
-    elif player_info["Position"] == "Defender":
-        st.markdown("- 1v1 defending drills")
-        st.markdown("- Tackling and positioning")
-    elif player_info["Position"] == "Goalkeeper":
-        st.markdown("- Reaction training")
-        st.markdown("- Distribution under pressure")
-
-    st.markdown(f"**Fitness Tip**: Maintain above {90 if player_info['Fitness'] < 90 else 95}% fitness with hydration, recovery, and proper sleep.")
-
-# --- FOOTER ---
-st.markdown("---")
-st.markdown("📍 Powered by Coach Kanyeki • Wosh FC • 2025")
 
 
     
