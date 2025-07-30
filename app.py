@@ -1,115 +1,105 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
 import pandas as pd
-import random
+import plotly.express as px
+from datetime import date
 
-# -------------------- PAGE CONFIG --------------------
-st.set_page_config(page_title="Wosh FC Dashboard", layout="wide")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
 
-# -------------------- STYLING --------------------
-st.markdown("""
-    <style>
-        body {
-            background-color: #0e1117;
-            color: #ffffff;
-        }
-        .block-container {
-            padding: 2rem 2rem;
-        }
-        .stSidebar {
-            background-color: #111827;
-        }
-    </style>
-""", unsafe_allow_html=True)
+# --- HEADER ---
+st.title("⚽ Wosh FC Analyzer")
+st.markdown("From the streets to the stars 🌟")
 
-# -------------------- DATA --------------------
+# --- SIDEBAR NAVIGATION ---
+menu = st.sidebar.selectbox(
+    "Navigation",
+    ["🏠 Home", "👤 Player Profiles", "📊 Team Stats", "📅 Match History", "🏋️ Training Suggestions"]
+)
+
+# --- DATA ---
 players = [
-    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Europe"},
-    {"Name": "Willy", "Position": "Striker", "Traits": "Clinical, Fast", "Ambition": "Top Scorer"},
-    {"Name": "Sammy", "Position": "Defender", "Traits": "Aggressive, Leader", "Ambition": "Captain"},
-    {"Name": "Branton", "Position": "Goalkeeper", "Traits": "Brave, Reflexes", "Ambition": "Clean Sheets"},
-    {"Name": "Pasi", "Position": "Winger", "Traits": "Flair, Speed", "Ambition": "Highlight Plays"},
+    {"Name": "Ian", "Position": "Midfielder", "Age": 14, "Goals": 4, "Assists": 5, "Fitness": 80, "Traits": "Visionary, Calm"},
+    {"Name": "Willy", "Position": "Forward", "Age": 13, "Goals": 7, "Assists": 3, "Fitness": 88, "Traits": "Pacy, Sharp finisher"},
+    {"Name": "Sammy", "Position": "Defender", "Age": 14, "Goals": 1, "Assists": 1, "Fitness": 90, "Traits": "Tactical, Brave"},
+    {"Name": "Branton", "Position": "Goalkeeper", "Age": 13, "Goals": 0, "Assists": 0, "Fitness": 92, "Traits": "Shot-stopper"},
+    {"Name": "Victor", "Position": "Midfielder", "Age": 14, "Goals": 3, "Assists": 4, "Fitness": 84, "Traits": "Creative, Agile"},
 ]
+player_df = pd.DataFrame(players)
 
-df = pd.DataFrame(players)
+# --- HOME PAGE ---
+if menu == "🏠 Home":
+    st.subheader("Welcome to Wosh FC Analyzer")
+    st.image("https://images.unsplash.com/photo-1604079628043-94302f7f1c3e", caption="Wosh FC in Action", use_column_width=True)
+    st.markdown("This platform empowers Wosh FC players by analyzing stats, tracking progress, and offering training suggestions.")
 
-# -------------------- SIDEBAR --------------------
-with st.sidebar:
-    choice = option_menu("Wosh FC Dashboard", 
-        ["Home", "Player Profiles", "Team Stats", "Match History", "Training Suggestions"],
-        icons=["house", "person", "bar-chart", "clock-history", "lightbulb"],
-        default_index=0)
+# --- PLAYER PROFILES ---
+elif menu == "👤 Player Profiles":
+    st.subheader("Player Profiles")
+    selected_player = st.selectbox("Select Player", player_df["Name"])
+    player_info = player_df[player_df["Name"] == selected_player].iloc[0]
 
-# -------------------- HOME --------------------
-if choice == "Home":
-    st.title("⚽ Welcome to Wosh FC Dashboard")
-    st.subheader("From the streets to the stars 🌟")
-    st.write("Track individual player development, team progress, and AI-based training suggestions. This is more than data — this is your legacy.")
-    st.image("https://images.unsplash.com/photo-1618739174394-b28130d6f4c6", use_column_width=True)
+    st.markdown(f"**Name:** {player_info['Name']}")
+    st.markdown(f"**Position:** {player_info['Position']}")
+    st.markdown(f"**Age:** {player_info['Age']}")
+    st.markdown(f"**Goals:** {player_info['Goals']}")
+    st.markdown(f"**Assists:** {player_info['Assists']}")
+    st.markdown(f"**Fitness Level:** {player_info['Fitness']}%")
+    st.markdown(f"**Traits:** {player_info['Traits']}")
 
-# -------------------- PLAYER PROFILES --------------------
-elif choice == "Player Profiles":
-    st.title("🧍 Player Profiles")
-    for player in players:
-        with st.expander(player["Name"]):
-            st.write(f"**Position:** {player['Position']}")
-            st.write(f"**Traits:** {player['Traits']}")
-            st.write(f"**Ambition:** {player['Ambition']}")
-            notes = st.text_area(f"🔖 Notes for {player['Name']}", "")
-            st.write("---")
+# --- TEAM STATS ---
+elif menu == "📊 Team Stats":
+    st.subheader("Team Performance Statistics")
 
-# -------------------- TEAM STATS --------------------
-elif choice == "Team Stats":
-    st.title("📊 Team Stats")
-    st.subheader("Overall Summary")
-    
-    total_players = len(players)
-    avg_goals = round(random.uniform(1.2, 2.5), 2)
-    clean_sheets = random.randint(3, 10)
+    st.markdown("### Goals by Player")
+    fig = px.bar(player_df, x="Name", y="Goals", color="Position", title="Top Scorers")
+    st.plotly_chart(fig, use_container_width=True)
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Players", total_players)
-    col2.metric("Avg Goals/Game", avg_goals)
-    col3.metric("Clean Sheets", clean_sheets)
+    st.markdown("### Fitness Overview")
+    fig2 = px.line(player_df, x="Name", y="Fitness", markers=True, title="Player Fitness Levels")
+    st.plotly_chart(fig2, use_container_width=True)
 
-    st.bar_chart(pd.DataFrame({
-        "Training Attendance": [random.randint(75, 100) for _ in range(total_players)],
-        "Match Performance": [random.randint(60, 95) for _ in range(total_players)],
-    }, index=[p["Name"] for p in players]))
-
-# -------------------- MATCH HISTORY --------------------
-elif choice == "Match History":
-    st.title("📅 Match History")
-    match_data = pd.DataFrame({
-        "Date": pd.date_range(end=pd.Timestamp.today(), periods=5).strftime('%Y-%m-%d'),
-        "Opponent": ["Elite FC", "Kings XI", "Wolf Pack", "Hustlers", "Kawangware United"],
-        "Result": ["2-1 W", "1-3 L", "0-0 D", "4-2 W", "1-1 D"],
-        "MVP": random.choices([p["Name"] for p in players], k=5)
-    })
-    st.table(match_data)
-
-# -------------------- TRAINING SUGGESTIONS --------------------
-elif choice == "Training Suggestions":
-    st.title("💡 AI-Powered Training Suggestions")
-
-    selected = st.selectbox("Choose a player:", [p["Name"] for p in players])
-    st.subheader(f"Training Plan for {selected}")
-
-    suggestion_map = {
-        "Striker": ["Finishing Drills", "Off-the-ball Movement", "1v1 Situations"],
-        "Midfielder": ["Passing Under Pressure", "Vision Enhancement", "Small-sided Games"],
-        "Defender": ["Tackling Precision", "Positioning", "Set-Piece Defense"],
-        "Goalkeeper": ["Shot Stopping", "Distribution", "1v1s"],
-        "Winger": ["Crossing", "Dribbling in Tight Spaces", "Quick Decision-Making"]
+# --- MATCH HISTORY ---
+elif menu == "📅 Match History":
+    st.subheader("Match History")
+    match_data = {
+        "Date": ["2025-07-01", "2025-07-15", "2025-07-20"],
+        "Opponent": ["Zorphar SC", "Makadara United", "Young Stars"],
+        "Result": ["2-1 W", "0-2 L", "3-3 D"],
+        "Man of the Match": ["Willy", "Victor", "Ian"]
     }
+    match_df = pd.DataFrame(match_data)
+    st.table(match_df)
 
-    position = next((p["Position"] for p in players if p["Name"] == selected), "Midfielder")
-    drills = suggestion_map.get(position, ["Conditioning", "Ball Control", "Game Awareness"])
+# --- TRAINING SUGGESTIONS ---
+elif menu == "🏋️ Training Suggestions":
+    st.subheader("AI Training Suggestions")
+    st.markdown("Select a player to get personalized training recommendations.")
 
-    st.write("🧠 **Suggested Focus Areas:**")
-    for drill in drills:
-        st.markdown(f"- {drill}")
+    selected_player = st.selectbox("Choose Player", player_df["Name"], key="training")
+    player_info = player_df[player_df["Name"] == selected_player].iloc[0]
+
+    # Simple logic-based AI suggestion
+    st.markdown(f"### For {selected_player}")
+    if player_info["Position"] == "Forward":
+        st.markdown("- Improve shooting accuracy")
+        st.markdown("- Sprint drills and agility")
+    elif player_info["Position"] == "Midfielder":
+        st.markdown("- Vision and passing accuracy")
+        st.markdown("- Long-range shooting")
+    elif player_info["Position"] == "Defender":
+        st.markdown("- 1v1 defending drills")
+        st.markdown("- Tackling and positioning")
+    elif player_info["Position"] == "Goalkeeper":
+        st.markdown("- Reaction training")
+        st.markdown("- Distribution under pressure")
+
+    st.markdown(f"**Fitness Tip**: Maintain above {90 if player_info['Fitness'] < 90 else 95}% fitness with hydration, recovery, and proper sleep.")
+
+# --- FOOTER ---
+st.markdown("---")
+st.markdown("📍 Powered by Coach Kanyeki • Wosh FC • 2025")
+
     
-    st.success("Train smart. Grow fast. Shine brightest. 🌟")
+
 
 
