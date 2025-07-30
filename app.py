@@ -1,5 +1,4 @@
 import streamlit as st
-import pyttsx3
 from datetime import date
 import pandas as pd
 
