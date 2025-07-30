@@ -1,85 +1,110 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+import plotly.express as px
+from streamlit_option_menu import option_menu
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="Wosh FC | From Streets to Stars", layout="wide")
+# -------------- Streamlit Page Config --------------
+st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
 
-# --- HEADER ---
-st.title("⚽ Wosh FC Analyzer")
-st.markdown("### From the Streets to the Stars 🌟")
-st.markdown("Empowering youth through football under Waves of Street Hope")
-
-# --- SIDEBAR ---
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Players", "Stats Dashboard", "Support Us", "Contact"])
-
-# --- DATA ---
+# -------------- Sample Data --------------
 players = [
-    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Play for Harambee Stars", "Goals": 4},
-    {"Name": "Willy", "Position": "Defender", "Traits": "Aggressive, Vocal", "Ambition": "Coach in future", "Goals": 1},
-    {"Name": "Sammy", "Position": "Goalkeeper", "Traits": "Reliable, Brave", "Ambition": "Be a pro keeper", "Goals": 0},
-    {"Name": "Victor", "Position": "Striker", "Traits": "Sharp, Fast", "Ambition": "Play in Europe", "Goals": 7},
-    {"Name": "Jamo", "Position": "Winger", "Traits": "Creative, Confident", "Ambition": "Be a coach and a player", "Goals": 5},
+    {"Name": "Ian", "Position": "Midfielder", "Goals": 5, "Assists": 7, "PassAccuracy": 85, "Dribbles": 12, "Minutes": 540, "Traits": "Visionary, Calm"},
+    {"Name": "Willy", "Position": "Defender", "Goals": 1, "Assists": 2, "PassAccuracy": 90, "Dribbles": 3, "Minutes": 600, "Traits": "Aggressive, Vocal"},
+    {"Name": "Sammy", "Position": "Striker", "Goals": 11, "Assists": 4, "PassAccuracy": 78, "Dribbles": 25, "Minutes": 480, "Traits": "Speedy, Confident"},
+    {"Name": "Victor", "Position": "Goalkeeper", "Goals": 0, "Assists": 0, "PassAccuracy": 65, "Dribbles": 1, "Minutes": 630, "Traits": "Focused, Brave"},
+    {"Name": "Branton", "Position": "Winger", "Goals": 6, "Assists": 5, "PassAccuracy": 80, "Dribbles": 18, "Minutes": 510, "Traits": "Creative, Agile"},
 ]
+
 player_df = pd.DataFrame(players)
 
-# --- HOME PAGE ---
-if page == "Home":
-    st.image("https://i.imgur.com/UYiroysl.jpg", use_column_width=True)
-    st.markdown("""
-    ### Our Story
-    Wosh FC is a community-driven football club nurturing street-connected youth with purpose and passion.
+match_history = pd.DataFrame({
+    "Match": ["Wosh FC vs Aces", "Wosh FC vs Stars", "Wosh FC vs Blaze"],
+    "Result": ["2-1", "1-3", "0-0"],
+    "Win": [1, 0, 0],
+    "Loss": [0, 1, 0],
+    "Draw": [0, 0, 1],
+})
 
-    We believe in second chances, talent development, and building a better future through sport. 
-    "From the Streets to the Stars" is not just our motto — it's our mission.
-    """)
-    st.success("Currently training 40+ youth with 3 different age groups")
-    st.info("Follow us on TikTok, Instagram & YouTube for match updates and behind-the-scenes content.")
+# -------------- Sidebar Navigation --------------
+with st.sidebar:
+    choice = option_menu("Wosh FC Dashboard", ["Home", "Player Profiles", "Team Stats", "Match History", "Training Suggestions"],
+                         icons=["house", "person-circle", "bar-chart", "calendar3", "lightbulb"],
+                         default_index=0)
 
-# --- PLAYERS PAGE ---
-elif page == "Players":
-    st.subheader("👥 Meet Our Players")
-    selected_position = st.selectbox("Filter by position", ["All"] + list(player_df["Position"].unique()))
-    if selected_position != "All":
-        filtered_df = player_df[player_df["Position"] == selected_position]
-    else:
-        filtered_df = player_df
-    st.dataframe(filtered_df.drop(columns=["Goals"]))
+# -------------- Home Page --------------
+if choice == "Home":
+    st.title("⚽ Wosh FC Analyzer")
+    st.markdown("**From the Streets to the Stars 🌟**")
+    st.image("https://i.imgur.com/3ZQ3Z2A.png", width=600)
+    st.info("Welcome to the official Wosh FC Dashboard — track player performance, team growth, and prepare for greatness.")
 
-# --- STATS PAGE ---
-elif page == "Stats Dashboard":
-    st.subheader("📊 Player Stats")
-    fig = px.bar(player_df, x="Name", y="Goals", color="Position", title="Top Scorers")
-    st.plotly_chart(fig, use_container_width=True)
+# -------------- Player Profiles --------------
+elif choice == "Player Profiles":
+    st.title("👤 Player Profiles")
+    selected_player = st.selectbox("Select Player", player_df["Name"])
+    player_data = player_df[player_df["Name"] == selected_player].iloc[0]
 
-    st.markdown("### Motivational Quote")
-    st.code("\"Talent wins games, but teamwork and intelligence win championships.\" – Michael Jordan")
+    st.subheader(f"Stats for {selected_player}")
+    st.metric("Goals", player_data["Goals"])
+    st.metric("Assists", player_data["Assists"])
+    st.metric("Pass Accuracy (%)", player_data["PassAccuracy"])
+    st.metric("Dribbles", player_data["Dribbles"])
+    st.metric("Minutes Played", player_data["Minutes"])
 
-# --- SUPPORT PAGE ---
-elif page == "Support Us":
-    st.subheader("💖 Support Wosh FC")
-    st.markdown("""
-    Help us empower youth through football:
+    st.success(f"Traits: {player_data['Traits']}")
 
-    - Donate equipment (boots, kits)
-    - Sponsor a player
-    - Fund transport for matches
+    growth_tip = ""
+    if player_data['PassAccuracy'] < 75:
+        growth_tip += "Work on passing under pressure.\n"
+    if player_data['Dribbles'] < 5:
+        growth_tip += "Improve dribbling drills and creativity.\n"
+    if player_data['Goals'] < 2:
+        growth_tip += "Focus on finishing and composure in front of goal."
 
-# --- CONTACT PAGE ---
-elif page == "Contact":
-    st.subheader("📬 Contact Us")
-    st.markdown("""
-    Have questions, want to volunteer or collaborate?
+    st.warning("**Growth Recommendation:**\n" + (growth_tip if growth_tip else "Player is showing solid progress."))
 
-    - WhatsApp: [+254 702 816 585](https://wa.me/254702816585)
-    - Email: [wavesofstreethope@gmail.com](mailto:wavesofstreethope@gmail.com)
-    - Instagram: [@woshfc](https://instagram.com)
-    """)
+# -------------- Team Stats --------------
+elif choice == "Team Stats":
+    st.title("📊 Team Performance")
 
-    st.text_input("Your Name")
-    st.text_area("Your Message")
-    st.button("Send Message")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Top Scorers")
+        fig = px.bar(player_df.sort_values("Goals", ascending=False), x="Name", y="Goals", color="Position")
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        st.subheader("Assist Leaders")
+        fig2 = px.bar(player_df.sort_values("Assists", ascending=False), x="Name", y="Assists", color="Position")
+        st.plotly_chart(fig2, use_container_width=True)
+
+    st.subheader("Pass Accuracy vs Dribbles")
+    fig3 = px.scatter(player_df, x="PassAccuracy", y="Dribbles", color="Position", size="Minutes", hover_name="Name")
+    st.plotly_chart(fig3, use_container_width=True)
+
+# -------------- Match History --------------
+elif choice == "Match History":
+    st.title("📅 Match History")
+    st.dataframe(match_history)
+
+    st.subheader("Match Results Overview")
+    match_summary = match_history[["Win", "Loss", "Draw"]].sum()
+    st.bar_chart(match_summary)
+
+# -------------- Training Suggestions --------------
+elif choice == "Training Suggestions":
+    st.title("💡 Training Recommendations")
+
+    st.markdown("Focus areas for the team based on performance data:")
+
+    st.info("**Strikers** → Finishing drills, off-the-ball movement")
+    st.info("**Midfielders** → Vision training, pass accuracy under pressure")
+    st.info("**Defenders** → 1v1 defending, aerial dominance")
+    st.info("**Goalkeepers** → Reaction time, command of box")
+
+    st.warning("Set individual goals weekly and track improvements here!")
+
 
 
 
