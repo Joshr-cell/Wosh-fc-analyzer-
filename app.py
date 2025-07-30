@@ -1,89 +1,83 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-
+from datetime import date
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Wosh FC | From Streets to Stars", layout="wide")
+st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
 
 # --- HEADER ---
 st.title("⚽ Wosh FC Analyzer")
-st.markdown("### From the Streets to the Stars 🌟")
-st.markdown("Empowering youth through football under Waves of Street Hope")
+st.markdown("From the streets to the stars 🌟")
 
-# --- SIDEBAR ---
-st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Players", "Stats Dashboard", "Support Us", "Contact"])
-
-# --- DATA ---
+# --- PLAYER DATA ---
 players = [
-    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Play for Harambee Stars", "Goals": 4},
-    {"Name": "Willy", "Position": "Defender", "Traits": "Aggressive, Vocal", "Ambition": "Coach in future", "Goals": 1},
-    {"Name": "Sammy", "Position": "Goalkeeper", "Traits": "Reliable, Brave", "Ambition": "Be a pro keeper", "Goals": 0},
-    {"Name": "Victor", "Position": "Striker", "Traits": "Sharp, Fast", "Ambition": "Play in Europe", "Goals": 7},
-    {"Name": "Jamo", "Position": "Winger", "Traits": "Creative, Confident", "Ambition": "Be a coach and a player", "Goals": 5},
+    {"Name": "Ian", "Position": "Midfielder", "Goals": 3, "Assists": 5, "Traits": "Visionary, Calm", "Ambition": "Play for AFC Leopards"},
+    {"Name": "Willy", "Position": "Defender", "Goals": 1, "Assists": 2, "Traits": "Tactical, Tough", "Ambition": "Be a coach"},
+    {"Name": "Sammy", "Position": "Striker", "Goals": 8, "Assists": 1, "Traits": "Fast, Finisher", "Ambition": "Play abroad"},
+    {"Name": "Branton", "Position": "Midfielder", "Goals": 4, "Assists": 6, "Traits": "Creative, Confident", "Ambition": "Join national team"},
+    {"Name": "Samson", "Position": "Goalkeeper", "Goals": 0, "Assists": 0, "Traits": "Brave, Vocal", "Ambition": "Be Kenya 1"},
+    {"Name": "Pasi", "Position": "Winger", "Goals": 6, "Assists": 4, "Traits": "Skilful, Agile", "Ambition": "Play in Europe"},
+    {"Name": "Ole", "Position": "Midfielder", "Goals": 2, "Assists": 3, "Traits": "Smart, Composed", "Ambition": "Coach kids"},
+    {"Name": "Byron", "Position": "Defender", "Goals": 1, "Assists": 1, "Traits": "Hardworking", "Ambition": "Play for Gor Mahia"},
+    {"Name": "Munene", "Position": "Striker", "Goals": 7, "Assists": 2, "Traits": "Strong, Sharp", "Ambition": "Be pro"},
+    {"Name": "Victor", "Position": "Winger", "Goals": 5, "Assists": 3, "Traits": "Speedster", "Ambition": "Travel the world"},
+    {"Name": "Mose", "Position": "Midfielder", "Goals": 2, "Assists": 2, "Traits": "Quiet leader", "Ambition": "Coach someday"},
+    {"Name": "Jamo", "Position": "Striker", "Goals": 4, "Assists": 1, "Traits": "Bold, Brave", "Ambition": "Play in KPL"},
 ]
+
 player_df = pd.DataFrame(players)
 
-# --- HOME PAGE ---
-if page == "Home":
-    st.image("https://i.imgur.com/UYiroysl.jpg", use_column_width=True)
-    st.markdown("""
-    ### Our Story
-    Wosh FC is a community-driven football club nurturing street-connected youth with purpose and passion.
+# --- PLAYER TABLE ---
+with st.expander("📋 Full Player Stats"):
+    st.dataframe(player_df)
 
-    We believe in second chances, talent development, and building a better future through sport. 
-    "From the Streets to the Stars" is not just our motto — it's our mission.
-    """)
-    st.success("Currently training 40+ youth with 3 different age groups")
-    st.info("Follow us on TikTok, Instagram & YouTube for match updates and behind-the-scenes content.")
+# --- TOP SCORERS CHART ---
+top_scorers = player_df.sort_values(by="Goals", ascending=False).head(10)
+fig = px.bar(top_scorers, x="Name", y="Goals", color="Position",
+             title="🌟 Top 10 Goal Scorers - Wosh FC", text="Goals", template="plotly_dark")
+fig.update_traces(textposition="outside")
+st.plotly_chart(fig, use_container_width=True)
 
-# --- PLAYERS PAGE ---
-elif page == "Players":
-    st.subheader("👥 Meet Our Players")
-    selected_position = st.selectbox("Filter by position", ["All"] + list(player_df["Position"].unique()))
-    if selected_position != "All":
-        filtered_df = player_df[player_df["Position"] == selected_position]
-    else:
-        filtered_df = player_df
-    st.dataframe(filtered_df.drop(columns=["Goals"]))
+# --- MATCH ANALYSIS SECTION ---
+st.markdown("## 📊 Match Analysis")
+with st.form("match_form"):
+    match_date = st.date_input("Match Date")
+    opponent = st.text_input("Opponent Team")
+    possession = st.slider("Possession %", 0, 100, 50)
+    passes = st.number_input("Passes Completed", min_value=0)
+    shots = st.number_input("Shots on Target", min_value=0)
+    fouls = st.number_input("Fouls Committed", min_value=0)
+    corners = st.number_input("Corners Taken", min_value=0)
+    submitted = st.form_submit_button("Save Match Stats")
 
-# --- STATS PAGE ---
-elif page == "Stats Dashboard":
-    st.subheader("📊 Player Stats")
-    fig = px.bar(player_df, x="Name", y="Goals", color="Position", title="Top Scorers")
-    st.plotly_chart(fig, use_container_width=True)
+    if submitted:
+        st.success(f"✅ Match against {opponent} on {match_date} recorded.")
+        st.write("**Summary:**")
+        st.write(f"Possession: {possession}%")
+        st.write(f"Passes: {passes}, Shots: {shots}, Fouls: {fouls}, Corners: {corners}")
 
-    st.markdown("### Motivational Quote")
-    st.code("\"Talent wins games, but teamwork and intelligence win championships.\" – Michael Jordan")
+# --- PLAYER DEVELOPMENT TRACKING ---
+st.markdown("## 🚀 Player Development")
+selected_player = st.selectbox("Choose a Player", player_df["Name"].unique())
+st.write(f"Tracking development for **{selected_player}**")
 
-# --- SUPPORT PAGE ---
-elif page == "Support Us":
-    st.subheader("💖 Support Wosh FC")
-    st.markdown("""
-    Help us empower youth through football:
+col1, col2, col3 = st.columns(3)
+with col1:
+    stamina = st.slider("Stamina", 0, 100, 50)
+with col2:
+    confidence = st.slider("Confidence", 0, 100, 50)
+with col3:
+    discipline = st.slider("Discipline", 0, 100, 50)
 
-    - Donate equipment (boots, kits)
-    - Sponsor a player
-    - Fund transport for matches
+coach_notes = st.text_area("Coach Notes", placeholder="Write observations here...")
 
-    M-PESA Paybill: `123456`  
-    PayPal: `wavesofstreethope@gmail.com`
-    """)
-    st.image("https://i.imgur.com/8zjGQpT.jpg", caption="Training session at Wosh FC", use_column_width=True)
+if st.button("Save Development Record"):
+    st.success("✅ Player development record saved.")
+    st.write(f"**Stamina:** {stamina}, **Confidence:** {confidence}, **Discipline:** {discipline}")
+    if coach_notes:
+        st.markdown(f"**Coach Notes:** {coach_notes}")
 
-# --- CONTACT PAGE ---
-elif page == "Contact":
-    st.subheader("📬 Contact Us")
-    st.markdown("""
-    Have questions, want to volunteer or collaborate?
-
-    - WhatsApp: [+254 702 816 585](https://wa.me/254702816585)
-    - Email: [wavesofstreethope@gmail.com](mailto:wavesofstreethope@gmail.com)
-    - Instagram: [@woshfc](https://instagram.com)
-    """)
-
-    st.text_input("Your Name")
-    st.text_area("Your Message")
-    st.button("Send Message")
+# --- FOOTER ---
+st.markdown("---")
+st.caption(f"Last updated: {date.today()} | Powered by Waves of Street Hope 💙")
 
 
