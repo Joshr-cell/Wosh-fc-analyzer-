@@ -1,110 +1,115 @@
 import streamlit as st
-import pandas as pd
 from streamlit_option_menu import option_menu
+import pandas as pd
+import random
 
-# -------------- Streamlit Page Config --------------
-st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
+# -------------------- PAGE CONFIG --------------------
+st.set_page_config(page_title="Wosh FC Dashboard", layout="wide")
 
-# -------------- Sample Data --------------
+# -------------------- STYLING --------------------
+st.markdown("""
+    <style>
+        body {
+            background-color: #0e1117;
+            color: #ffffff;
+        }
+        .block-container {
+            padding: 2rem 2rem;
+        }
+        .stSidebar {
+            background-color: #111827;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# -------------------- DATA --------------------
 players = [
-    {"Name": "Ian", "Position": "Midfielder", "Goals": 5, "Assists": 7, "PassAccuracy": 85, "Dribbles": 12, "Minutes": 540, "Traits": "Visionary, Calm"},
-    {"Name": "Willy", "Position": "Defender", "Goals": 1, "Assists": 2, "PassAccuracy": 90, "Dribbles": 3, "Minutes": 600, "Traits": "Aggressive, Vocal"},
-    {"Name": "Sammy", "Position": "Striker", "Goals": 11, "Assists": 4, "PassAccuracy": 78, "Dribbles": 25, "Minutes": 480, "Traits": "Speedy, Confident"},
-    {"Name": "Victor", "Position": "Goalkeeper", "Goals": 0, "Assists": 0, "PassAccuracy": 65, "Dribbles": 1, "Minutes": 630, "Traits": "Focused, Brave"},
-    {"Name": "Branton", "Position": "Winger", "Goals": 6, "Assists": 5, "PassAccuracy": 80, "Dribbles": 18, "Minutes": 510, "Traits": "Creative, Agile"},
+    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Europe"},
+    {"Name": "Willy", "Position": "Striker", "Traits": "Clinical, Fast", "Ambition": "Top Scorer"},
+    {"Name": "Sammy", "Position": "Defender", "Traits": "Aggressive, Leader", "Ambition": "Captain"},
+    {"Name": "Branton", "Position": "Goalkeeper", "Traits": "Brave, Reflexes", "Ambition": "Clean Sheets"},
+    {"Name": "Pasi", "Position": "Winger", "Traits": "Flair, Speed", "Ambition": "Highlight Plays"},
 ]
 
-player_df = pd.DataFrame(players)
+df = pd.DataFrame(players)
 
-match_history = pd.DataFrame({
-    "Match": ["Wosh FC vs Aces", "Wosh FC vs Stars", "Wosh FC vs Blaze"],
-    "Result": ["2-1", "1-3", "0-0"],
-    "Win": [1, 0, 0],
-    "Loss": [0, 1, 0],
-    "Draw": [0, 0, 1],
-})
-
-# -------------- Sidebar Navigation --------------
+# -------------------- SIDEBAR --------------------
 with st.sidebar:
-    choice = option_menu("Wosh FC Dashboard", ["Home", "Player Profiles", "Team Stats", "Match History", "Training Suggestions"],
-                         icons=["house", "person-circle", "bar-chart", "calendar3", "lightbulb"],
-                         default_index=0)
+    choice = option_menu("Wosh FC Dashboard", 
+        ["Home", "Player Profiles", "Team Stats", "Match History", "Training Suggestions"],
+        icons=["house", "person", "bar-chart", "clock-history", "lightbulb"],
+        default_index=0)
 
-# -------------- Home Page --------------
+# -------------------- HOME --------------------
 if choice == "Home":
-    st.title("⚽ Wosh FC Analyzer")
-    st.markdown("**From the Streets to the Stars 🌟**")
-    st.image("https://i.imgur.com/3ZQ3Z2A.png", width=600)
-    st.info("Welcome to the official Wosh FC Dashboard — track player performance, team growth, and prepare for greatness.")
+    st.title("⚽ Welcome to Wosh FC Dashboard")
+    st.subheader("From the streets to the stars 🌟")
+    st.write("Track individual player development, team progress, and AI-based training suggestions. This is more than data — this is your legacy.")
+    st.image("https://images.unsplash.com/photo-1618739174394-b28130d6f4c6", use_column_width=True)
 
-# -------------- Player Profiles --------------
+# -------------------- PLAYER PROFILES --------------------
 elif choice == "Player Profiles":
-    st.title("👤 Player Profiles")
-    selected_player = st.selectbox("Select Player", player_df["Name"])
-    player_data = player_df[player_df["Name"] == selected_player].iloc[0]
+    st.title("🧍 Player Profiles")
+    for player in players:
+        with st.expander(player["Name"]):
+            st.write(f"**Position:** {player['Position']}")
+            st.write(f"**Traits:** {player['Traits']}")
+            st.write(f"**Ambition:** {player['Ambition']}")
+            notes = st.text_area(f"🔖 Notes for {player['Name']}", "")
+            st.write("---")
 
-    st.subheader(f"Stats for {selected_player}")
-    st.metric("Goals", player_data["Goals"])
-    st.metric("Assists", player_data["Assists"])
-    st.metric("Pass Accuracy (%)", player_data["PassAccuracy"])
-    st.metric("Dribbles", player_data["Dribbles"])
-    st.metric("Minutes Played", player_data["Minutes"])
-
-    st.success(f"Traits: {player_data['Traits']}")
-
-    growth_tip = ""
-    if player_data['PassAccuracy'] < 75:
-        growth_tip += "Work on passing under pressure.\n"
-    if player_data['Dribbles'] < 5:
-        growth_tip += "Improve dribbling drills and creativity.\n"
-    if player_data['Goals'] < 2:
-        growth_tip += "Focus on finishing and composure in front of goal."
-
-    st.warning("**Growth Recommendation:**\n" + (growth_tip if growth_tip else "Player is showing solid progress."))
-
-# -------------- Team Stats --------------
+# -------------------- TEAM STATS --------------------
 elif choice == "Team Stats":
-    st.title("📊 Team Performance")
+    st.title("📊 Team Stats")
+    st.subheader("Overall Summary")
+    
+    total_players = len(players)
+    avg_goals = round(random.uniform(1.2, 2.5), 2)
+    clean_sheets = random.randint(3, 10)
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Players", total_players)
+    col2.metric("Avg Goals/Game", avg_goals)
+    col3.metric("Clean Sheets", clean_sheets)
 
-    with col1:
-        st.subheader("Top Scorers")
-        fig = px.bar(player_df.sort_values("Goals", ascending=False), x="Name", y="Goals", color="Position")
-        st.plotly_chart(fig, use_container_width=True)
+    st.bar_chart(pd.DataFrame({
+        "Training Attendance": [random.randint(75, 100) for _ in range(total_players)],
+        "Match Performance": [random.randint(60, 95) for _ in range(total_players)],
+    }, index=[p["Name"] for p in players]))
 
-    with col2:
-        st.subheader("Assist Leaders")
-        fig2 = px.bar(player_df.sort_values("Assists", ascending=False), x="Name", y="Assists", color="Position")
-        st.plotly_chart(fig2, use_container_width=True)
-
-    st.subheader("Pass Accuracy vs Dribbles")
-    fig3 = px.scatter(player_df, x="PassAccuracy", y="Dribbles", color="Position", size="Minutes", hover_name="Name")
-    st.plotly_chart(fig3, use_container_width=True)
-
-# -------------- Match History --------------
+# -------------------- MATCH HISTORY --------------------
 elif choice == "Match History":
     st.title("📅 Match History")
-    st.dataframe(match_history)
+    match_data = pd.DataFrame({
+        "Date": pd.date_range(end=pd.Timestamp.today(), periods=5).strftime('%Y-%m-%d'),
+        "Opponent": ["Elite FC", "Kings XI", "Wolf Pack", "Hustlers", "Kawangware United"],
+        "Result": ["2-1 W", "1-3 L", "0-0 D", "4-2 W", "1-1 D"],
+        "MVP": random.choices([p["Name"] for p in players], k=5)
+    })
+    st.table(match_data)
 
-    st.subheader("Match Results Overview")
-    match_summary = match_history[["Win", "Loss", "Draw"]].sum()
-    st.bar_chart(match_summary)
-
-# -------------- Training Suggestions --------------
+# -------------------- TRAINING SUGGESTIONS --------------------
 elif choice == "Training Suggestions":
-    st.title("💡 Training Recommendations")
+    st.title("💡 AI-Powered Training Suggestions")
 
-    st.markdown("Focus areas for the team based on performance data:")
+    selected = st.selectbox("Choose a player:", [p["Name"] for p in players])
+    st.subheader(f"Training Plan for {selected}")
 
-    st.info("**Strikers** → Finishing drills, off-the-ball movement")
-    st.info("**Midfielders** → Vision training, pass accuracy under pressure")
-    st.info("**Defenders** → 1v1 defending, aerial dominance")
-    st.info("**Goalkeepers** → Reaction time, command of box")
+    suggestion_map = {
+        "Striker": ["Finishing Drills", "Off-the-ball Movement", "1v1 Situations"],
+        "Midfielder": ["Passing Under Pressure", "Vision Enhancement", "Small-sided Games"],
+        "Defender": ["Tackling Precision", "Positioning", "Set-Piece Defense"],
+        "Goalkeeper": ["Shot Stopping", "Distribution", "1v1s"],
+        "Winger": ["Crossing", "Dribbling in Tight Spaces", "Quick Decision-Making"]
+    }
 
-    st.warning("Set individual goals weekly and track improvements here!")
+    position = next((p["Position"] for p in players if p["Name"] == selected), "Midfielder")
+    drills = suggestion_map.get(position, ["Conditioning", "Ball Control", "Game Awareness"])
 
-
-
+    st.write("🧠 **Suggested Focus Areas:**")
+    for drill in drills:
+        st.markdown(f"- {drill}")
+    
+    st.success("Train smart. Grow fast. Shine brightest. 🌟")
 
 
