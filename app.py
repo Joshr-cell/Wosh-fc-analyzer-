@@ -1,9 +1,12 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from datetime import date
+import base64
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
+
 # --- FUNCTION TO SET BACKGROUND IMAGE ---
 def set_background(image_file):
     with open(image_file, "rb") as file:
@@ -28,9 +31,6 @@ set_background("WhatsApp Image 2025-07-24 at 10.55.21 AM (5).jpeg")
 st.image("WhatsApp Image 2025-07-24 at 10.55.21 AM (5).jpeg", width=150)
 st.title("⚽ Wosh FC Analyzer")
 st.markdown("From the streets to the stars 🌟")
-# --- HEADER ---
-st.title("⚽ Wosh FC Analyzer")
-st.markdown("From the streets to the stars 🌟")
 
 # --- SIDEBAR NAVIGATION ---
 menu = st.sidebar.selectbox(
@@ -48,10 +48,9 @@ players = [
 ]
 player_df = pd.DataFrame(players)
 
-# --- HOME PAGE ---
+# --- HOME ---
 if menu == "🏠 Home":
     st.subheader("Welcome to Wosh FC Analyzer")
-    st.image("https://images.unsplash.com/photo-1604079628043-94302f7f1c3e", caption="Wosh FC in Action", use_column_width=True)
     st.markdown("This platform empowers Wosh FC players by analyzing stats, tracking progress, and offering training suggestions.")
 
 # --- PLAYER PROFILES ---
@@ -95,12 +94,10 @@ elif menu == "📅 Match History":
 # --- TRAINING SUGGESTIONS ---
 elif menu == "🏋️ Training Suggestions":
     st.subheader("AI Training Suggestions")
-    st.markdown("Select a player to get personalized training recommendations.")
 
     selected_player = st.selectbox("Choose Player", player_df["Name"], key="training")
     player_info = player_df[player_df["Name"] == selected_player].iloc[0]
 
-    # Simple logic-based AI suggestion
     st.markdown(f"### For {selected_player}")
     if player_info["Position"] == "Forward":
         st.markdown("- Improve shooting accuracy")
@@ -120,6 +117,7 @@ elif menu == "🏋️ Training Suggestions":
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("📍 Powered by Coach Kanyeki • Wosh FC • 2025")
+
 
     
 
