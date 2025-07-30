@@ -4,7 +4,30 @@ from datetime import date
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
+# --- FUNCTION TO SET BACKGROUND IMAGE ---
+def set_background(image_file):
+    with open(image_file, "rb") as file:
+        img_bytes = file.read()
+        b64_img = base64.b64encode(img_bytes).decode()
+        css_code = f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpeg;base64,{b64_img}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        </style>
+        """
+        st.markdown(css_code, unsafe_allow_html=True)
 
+# --- SET BACKGROUND ---
+set_background("WhatsApp Image 2025-07-24 at 10.55.21 AM (5).jpeg")
+
+# --- HEADER ---
+st.image("WhatsApp Image 2025-07-24 at 10.55.21 AM (5).jpeg", width=150)
+st.title("⚽ Wosh FC Analyzer")
+st.markdown("From the streets to the stars 🌟")
 # --- HEADER ---
 st.title("⚽ Wosh FC Analyzer")
 st.markdown("From the streets to the stars 🌟")
