@@ -6,7 +6,7 @@ import plotly.express as px
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
 
 # --- HEADER ---
-st.title("⚽ Wosh FC Analyzer")
+st.title("⚽ Wosh FC App")
 st.markdown("From the streets to the stars 🌟 | Youth Football Development Platform")
 
 # --- SIDEBAR NAVIGATION ---
@@ -30,11 +30,11 @@ if menu == "Home":
     **Wosh FC** is dedicated to nurturing young football talent from underprivileged communities.
     
     We work across five age categories:
-    - ⚽ Under 7 (12 players)
-    - ⚽ Under 10 (12 players)
-    - ⚽ Under 12 (12 players)
-    - ⚽ Under 14 (12 players)
-    - ⚽ Under 16 (7 players)
+    - ⚽ Under 7 
+    - ⚽ Under 10 
+    - ⚽ Under 12 
+    - ⚽ Under 14 
+    - ⚽ Under 16 
     
     Use this platform to track player performance, plan drills, and review match data.
     """)
