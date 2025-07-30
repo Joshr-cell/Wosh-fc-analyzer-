@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from streamlit_option_menu import option_menu
 
 # -------------- Streamlit Page Config --------------
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
