@@ -1,8 +1,24 @@
 import streamlit as st
 from PIL import Image
+import plotly.graph_objects as go
 
 # --- Page Config ---
 st.set_page_config(page_title="Wosh FC Player Development", layout="wide")
+st.markdown("""
+    <style>
+    body {
+        background-color: #0e1117;
+        color: white;
+        font-family: 'Arial';
+    }
+    .stExpanderHeader {
+        font-size: 18px;
+        font-weight: bold;
+        color: #33ffcc;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("⚽ Wosh FC Player Development Tracker")
 st.markdown("From the streets to the stars 🌟")
 
@@ -22,17 +38,37 @@ player_groups = {
     "Under 15": under_15,
 }
 
-# --- Helper to Show Player Panel ---
+# --- Player Panel with Radar Chart ---
 def player_panel(player_name):
     with st.expander(player_name):
         st.image("https://via.placeholder.com/150", width=150)
-        st.subheader("Player Stats")
-        st.text("Speed: \\nDribbling: \\nPassing:")
+        st.subheader("📊 Technical Ratings")
 
-        st.subheader("Match Stats")
-        st.text("Goals: \\nAssists: \\nTackles:")
+        categories = ["Passing", "Dribbling", "Shooting", "Heading", "Crossing", "Shot Range"]
+        scores = [st.slider(cat, 0, 10, 5) for cat in categories]
 
-        st.subheader("Area of Improvement")
+        radar_fig = go.Figure()
+        radar_fig.add_trace(go.Scatterpolar(
+            r=scores + [scores[0]],
+            theta=categories + [categories[0]],
+            fill='toself',
+            name=player_name
+        ))
+        radar_fig.update_layout(
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0, 10]),
+                bgcolor="#1e1e1e"
+            ),
+            showlegend=False,
+            paper_bgcolor="#0e1117",
+            font_color="white"
+        )
+        st.plotly_chart(radar_fig, use_container_width=True)
+
+        st.subheader("📈 Match Stats")
+        st.text("Goals: \nAssists: \nTackles:")
+
+        st.subheader("🛠️ Area of Improvement")
         st.text("- Enter areas here")
 
 # --- Populate Each Age Tab ---
@@ -63,4 +99,5 @@ with tabs[5]:
     video_description = st.text_area("Video Description")
     if st.button("Upload Video"):
         st.success("Video uploaded (placeholder — not yet connected to storage)")
+
 
