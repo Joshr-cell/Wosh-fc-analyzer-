@@ -1,46 +1,66 @@
 import streamlit as st
-from datetime import date
-import pandas as pd
+from PIL import Image
 
-# --- Streamlit Config ---
-st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
-
-# --- Voice Assistant Function ---
-def speak_text(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
-
-# --- Speak Welcome Message ---
-speak_text("Welcome to Wosh FC Analyzer. From the streets to the stars.")
-
-# --- App Title and Tagline ---
-st.title("⚽ Wosh FC Analyzer")
+# --- Page Config ---
+st.set_page_config(page_title="Wosh FC Player Development", layout="wide")
+st.title("⚽ Wosh FC Player Development Tracker")
 st.markdown("From the streets to the stars 🌟")
 
-# --- Player Data ---
-players = [
-    {"Name": "Ian", "Position": "Midfielder", "Traits": "Visionary, Calm", "Ambition": "Play for Barcelona"},
-    {"Name": "Willy", "Position": "Defender", "Traits": "Strong, Reliable", "Ambition": "Captain Kenya National Team"},
-    {"Name": "Sammy", "Position": "Striker", "Traits": "Quick, Sharp", "Ambition": "Top scorer in Europe"},
-    {"Name": "Branton", "Position": "Goalkeeper", "Traits": "Agile, Brave", "Ambition": "Play in the Premier League"},
-    {"Name": "Samson", "Position": "Winger", "Traits": "Fast, Creative", "Ambition": "Become a global star"},
-    {"Name": "Pasi", "Position": "Midfielder", "Traits": "Tactical, Calm", "Ambition": "Coach youth players"},
-    {"Name": "Ole", "Position": "Defender", "Traits": "Disciplined, Tall", "Ambition": "Study in Europe"},
-    {"Name": "Byron", "Position": "Forward", "Traits": "Skillful, Focused", "Ambition": "Play for PSG"},
-    {"Name": "Munene", "Position": "Utility", "Traits": "Flexible, Hard-working", "Ambition": "Be a mentor"},
-    {"Name": "Victor", "Position": "Striker", "Traits": "Accurate, Powerful", "Ambition": "Be the best"},
-    {"Name": "Mose", "Position": "Defender", "Traits": "Smart, Brave", "Ambition": "Join Kenya Police FC"},
-    {"Name": "Jamo", "Position": "Winger", "Traits": "Energetic, Determined", "Ambition": "Get a scholarship"}
-]
+# --- Tabs ---
+tabs = st.tabs(["Under 7", "Under 11", "Under 14", "Under 15", "Match Analysis", "Video Module"])
 
-df = pd.DataFrame(players)
+# --- Players by Age Group ---
+under_7 = ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"]
+under_11 = ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"]
+under_14 = ["Byron", "Mokaya", "Branton", "Sakwa", "Victor", "Pasi", "Samuel", "Ole", "Samson", "Munene", "Moses", "Godfrey", "Messi Kiptoo", "Elvis Chacha"]
+under_15 = ["Massai", "Brighton", "Ponic", "Mutua", "Turu", "Frank", "Zablon", "Joseph"]
 
-# --- Display Data ---
-st.subheader("🌟 Player Profiles")
-st.dataframe(df, use_container_width=True)
+player_groups = {
+    "Under 7": under_7,
+    "Under 11": under_11,
+    "Under 14": under_14,
+    "Under 15": under_15,
+}
 
-# --- Voice Feedback Button ---
-if st.button("🔊 Say All Player Names"):
-    names = ", ".join(player["Name"] for player in players)
-    speak_text(f"The players are: {names}")
+# --- Helper to Show Player Panel ---
+def player_panel(player_name):
+    with st.expander(player_name):
+        st.image("https://via.placeholder.com/150", width=150)
+        st.subheader("Player Stats")
+        st.text("Speed: \\nDribbling: \\nPassing:")
+
+        st.subheader("Match Stats")
+        st.text("Goals: \\nAssists: \\nTackles:")
+
+        st.subheader("Area of Improvement")
+        st.text("- Enter areas here")
+
+# --- Populate Each Age Tab ---
+for i, (age_group, players) in enumerate(player_groups.items()):
+    with tabs[i]:
+        st.header(f"{age_group} Squad")
+        for player in players:
+            player_panel(player)
+
+# --- Match Analysis ---
+with tabs[4]:
+    st.header("📊 Match Analysis Input")
+    passes = st.number_input("Number of Passes", min_value=0)
+    possession = st.slider("Possession (%)", 0, 100)
+    shots = st.number_input("Shots on Goal", min_value=0)
+    corners = st.number_input("Number of Corners", min_value=0)
+    tackles = st.number_input("Number of Tackles", min_value=0)
+    fouls = st.number_input("Number of Fouls", min_value=0)
+    aerial_duels = st.number_input("Aerial Balls Won", min_value=0)
+    if st.button("Save Match Stats"):
+        st.success("Match stats saved (placeholder — not yet connected to database)")
+
+# --- Video Module ---
+with tabs[5]:
+    st.header("🎥 Video Module")
+    video = st.file_uploader("Upload Match Video", type=["mp4", "mov"])
+    video_title = st.text_input("Video Title")
+    video_description = st.text_area("Video Description")
+    if st.button("Upload Video"):
+        st.success("Video uploaded (placeholder — not yet connected to storage)")
+
