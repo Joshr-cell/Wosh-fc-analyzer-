@@ -1,7 +1,5 @@
 import streamlit as st
 from PIL import Image
-import plotly.graph_objects as go
-
 # --- Page Config ---
 st.set_page_config(page_title="Wosh FC Player Development", layout="wide")
 st.markdown("""
