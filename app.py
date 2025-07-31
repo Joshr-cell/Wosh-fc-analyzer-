@@ -1,6 +1,6 @@
+
 import streamlit as st
 from PIL import Image
-import plotly.graph_objects as go  # FIXED import
 
 # --- Page Config ---
 st.set_page_config(page_title="Wosh FC Player Development", layout="wide")
@@ -38,32 +38,21 @@ player_groups = {
     "Under 15": under_15,
 }
 
-# --- Player Panel with Radar Chart ---
+# --- Player Panel without Plotly ---
 def player_panel(player_name):
     with st.expander(player_name):
         st.image("https://via.placeholder.com/150", width=150)
 
         st.subheader("📊 Technical Ratings")
-        categories = ["Passing", "Dribbling", "Shooting", "Heading", "Crossing", "Shot Range"]
-        scores = [st.slider(cat, 0, 10, 5, key=f"{player_name}_{cat}") for cat in categories]
-
-        radar_fig = go.Figure()
-        radar_fig.add_trace(go.Scatterpolar(
-            r=scores + [scores[0]],
-            theta=categories + [categories[0]],
-            fill='toself',
-            name=player_name
-        ))
-        radar_fig.update_layout(
-            polar=dict(
-                radialaxis=dict(visible=True, range=[0, 10]),
-                bgcolor="#1e1e1e"
-            ),
-            showlegend=False,
-            paper_bgcolor="#0e1117",
-            font_color="white"
-        )
-        st.plotly_chart(radar_fig, use_container_width=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            passing = st.slider("Passing", 0, 10, 5, key=f"{player_name}_passing")
+            dribbling = st.slider("Dribbling", 0, 10, 5, key=f"{player_name}_dribbling")
+            shooting = st.slider("Shooting", 0, 10, 5, key=f"{player_name}_shooting")
+        with col2:
+            heading = st.slider("Heading", 0, 10, 5, key=f"{player_name}_heading")
+            crossing = st.slider("Crossing", 0, 10, 5, key=f"{player_name}_crossing")
+            shot_range = st.slider("Shot Range", 0, 10, 5, key=f"{player_name}_shotrange")
 
         st.subheader("📈 Match Stats")
         st.text("Goals: \nAssists: \nTackles:")
