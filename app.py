@@ -1,133 +1,133 @@
-# Wosh FC Visual Dashboard - Python + Streamlit
-# ---------------------------------------------
-# Inspired by PES 2014 / PS2 style with player panels and match stat input.
-
 import streamlit as st
-import random
-from datetime import datetime
+import pandas as pd
+import plotly.express as px
 import firebase_admin
 from firebase_admin import credentials, firestore
+import json
+import os
+from datetime import datetime
 
-# --- Firebase Setup (requires your serviceAccountKey.json file) ---
-if not firebase_admin._apps:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)
+# Firebase Initialization
+try:
+    if not firebase_admin._apps:
+        cred = credentials.Certificate("firebase_credentials.json")
+        firebase_admin.initialize_app(cred)
+    db = firestore.client()
+except Exception as e:
+    print("Firebase not connected:", e)
+    db = None
 
-db = firestore.client()
+# App Config
+st.set_page_config(page_title="Wosh FC Player Dashboard", layout="wide")
+st.title("⚽ Wosh FC Player Development App")
+st.markdown("From the streets to the stars 🌟")
 
-# --- CONFIG ---
-st.set_page_config(page_title="Wosh FC Dashboard", layout="wide")
-
-# --- STYLES ---
-st.markdown("""
-<style>
-    body {
-        background-color: #0d1117;
-        color: white;
-        font-family: 'Arial';
-    }
-    .player-card {
-        background: linear-gradient(145deg, #1f1f1f, #2e2e2e);
-        border-radius: 15px;
-        padding: 1rem;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        text-align: center;
-        color: #ffffff;
-        margin: 10px;
-    }
-    .stat-bar {
-        background: #333;
-        height: 10px;
-        border-radius: 5px;
-        margin-bottom: 5px;
-    }
-    .stat-fill {
-        height: 100%;
-        background: #00ff00;
-        border-radius: 5px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# --- PLAYER DATA ---
-players = {
+# Age Groups and Players
+age_groups = {
     "Under 7": ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"],
     "Under 11": ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"],
-    "Under 14": ["Byron", "Mokaya", "Branton", "Sakwa", "Victor", "Pasi", "Samuel", "Ole", "Samson", "Munene", "Moses", "Godfrey", "Messi Kiptoo", "Elvis Chacha"],
+    "Under 14": ["Byron", "Mokaya", "Branton", "Sakwa", "Victor", "Pasi", "Samuel", "Ole", "Samson", "Munene", "Moses", "Godfrey", "Messi", "Kiptoo", "Elvis", "Chacha"],
     "Under 15": ["Massai", "Brighton", "Ponic", "Mutua", "Turu", "Frank", "Zablon", "Joseph"]
 }
 
-# --- FUNCTIONS ---
-def random_stat():
-    return random.randint(30, 100)
+# CSS Styling and Animations
+st.markdown("""
+    <style>
+        .player-panel {
+            background-color: #1e1e2f;
+            padding: 1rem;
+            margin: 0.5rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: 0.3s;
+        }
+        .player-panel:hover {
+            transform: scale(1.02);
+            background-color: #292940;
+        }
+        .player-pic {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
-def display_player(name, age_group):
-    pic_url = f"https://picsum.photos/seed/{name}/100/100"
-    stats = {"Pace": random_stat(), "Passing": random_stat(), "Shooting": random_stat(), "Defense": random_stat()}
+# Player Stat Panel Generator
+def render_player_panel(name):
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        st.image(f"https://randomuser.me/api/portraits/men/{hash(name) % 100}.jpg", width=100)
+    with col2:
+        st.subheader(name)
+        goals = st.number_input(f"{name} - Goals", min_value=0, key=f"goals_{name}")
+        assists = st.number_input(f"{name} - Assists", min_value=0, key=f"assists_{name}")
+        tackles = st.number_input(f"{name} - Tackles", min_value=0, key=f"tackles_{name}")
+        improvement = st.text_area(f"{name} - Area of Improvement", key=f"improve_{name}")
+        save_data = st.button(f"Save Stats for {name}", key=f"save_{name}")
+        if save_data:
+            player_data = {
+                "goals": goals,
+                "assists": assists,
+                "tackles": tackles,
+                "improvement": improvement,
+                "timestamp": datetime.now().isoformat()
+            }
+            if db:
+                db.collection("players").document(name).set(player_data)
+                st.success("Saved to Firebase")
+            else:
+                os.makedirs("local_data", exist_ok=True)
+                with open(f"local_data/{name}.json", "w") as f:
+                    json.dump(player_data, f)
+                st.success("Saved locally")
 
-    with st.container():
-        st.markdown(f"""
-        <div class='player-card'>
-            <img src='{pic_url}' width='100' style='border-radius: 50%;'>
-            <h4>{name}</h4>
-            <p><b>Group:</b> {age_group}</p>
-        """, unsafe_allow_html=True)
+# Display All Age Groups
+for group, players in age_groups.items():
+    st.header(group)
+    for player in players:
+        with st.container():
+            render_player_panel(player)
 
-        for stat, value in stats.items():
-            st.markdown(f"""
-                <div>{stat}: {value}</div>
-                <div class='stat-bar'>
-                    <div class='stat-fill' style='width: {value}%'></div>
-                </div>
-            """, unsafe_allow_html=True)
+# Match Analysis Section
+st.header("📊 Match Analysis Input")
+passes = st.number_input("Total Passes", 0)
+possession = st.slider("Possession %", 0, 100)
+shots_on_goal = st.number_input("Shots on Goal", 0)
+corners = st.number_input("Corners", 0)
+tackles = st.number_input("Tackles", 0)
+aerials = st.number_input("Aerial Balls", 0)
 
-        st.markdown("<p><b>Improvement Area:</b> Stamina / Team Play</p></div>", unsafe_allow_html=True)
+heatmap_data = pd.DataFrame({
+    'x': [10, 30, 50, 70, 90],
+    'y': [20, 40, 30, 50, 60],
+    'intensity': [5, 2, 3, 4, 1]
+})
+st.subheader("Heat Map")
+st.plotly_chart(px.density_heatmap(heatmap_data, x='x', y='y', z='intensity', nbinsx=10, nbinsy=10))
 
-        # Firebase Save
-        doc_ref = db.collection("players").document(name)
-        doc_ref.set({
-            "name": name,
-            "age_group": age_group,
-            "stats": stats,
-            "updated": datetime.now()
-        })
+match_save = st.button("Save Match Report")
+if match_save:
+    match_stats = {
+        "passes": passes,
+        "possession": possession,
+        "shots_on_goal": shots_on_goal,
+        "corners": corners,
+        "tackles": tackles,
+        "aerials": aerials,
+        "timestamp": datetime.now().isoformat()
+    }
+    if db:
+        db.collection("match_reports").add(match_stats)
+        st.success("Match Report Saved to Firebase")
+    else:
+        os.makedirs("local_data", exist_ok=True)
+        with open("local_data/match_report.json", "w") as f:
+            json.dump(match_stats, f)
+        st.success("Match Report Saved Locally")
 
-# --- DISPLAY ---
-st.title("⚽ Wosh FC Player Development Dashboard")
-for group, names in players.items():
-    st.header(f"{group}")
-    cols = st.columns(4)
-    for i, name in enumerate(names):
-        with cols[i % 4]:
-            display_player(name, group)
+st.download_button("Download Match Report", json.dumps(match_stats, indent=4), file_name="match_report.json")
 
-# --- MATCH ANALYSIS PANEL ---
-st.markdown("---")
-st.subheader("📊 Match Analysis Input")
-match_data = {
-    "Game Date": st.date_input("Match Date"),
-    "Opponent": st.text_input("Opponent Team"),
-    "Goals Scored": st.number_input("Goals Scored", 0),
-    "Goals Conceded": st.number_input("Goals Conceded", 0),
-    "Possession %": st.slider("Possession", 0, 100),
-    "Shots on Target": st.number_input("Shots on Target", 0),
-    "Tackles": st.number_input("Tackles", 0),
-    "Corners": st.number_input("Corners", 0),
-    "Fouls": st.number_input("Fouls", 0),
-    "Notes": st.text_area("Game Notes")
-}
-
-if st.button("📥 Save Match Report"):
-    db.collection("match_reports").add({"data": match_data, "timestamp": datetime.now()})
-    st.success("Saved to Firebase!")
-
-# --- EXPORT SECTION ---
-if st.button("⬇️ Download All Match Reports"):
-    all_reports = db.collection("match_reports").stream()
-    reports_text = ""
-    for r in all_reports:
-        d = r.to_dict()
-        reports_text += f"\n\nDate: {d['data'].get('Game Date')}\nOpponent: {d['data'].get('Opponent')}\nGoals: {d['data'].get('Goals Scored')} - {d['data'].get('Goals Conceded')}\nNotes: {d['data'].get('Notes')}"
-
-    st.download_button("Download Report", reports_text, file_name="woshfc_match_reports.txt")
 
