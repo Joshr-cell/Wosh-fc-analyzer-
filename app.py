@@ -1,5 +1,7 @@
 import streamlit as st
 from PIL import Image
+import plotly.graph_objects as go  # FIXED import
+
 # --- Page Config ---
 st.set_page_config(page_title="Wosh FC Player Development", layout="wide")
 st.markdown("""
@@ -40,10 +42,10 @@ player_groups = {
 def player_panel(player_name):
     with st.expander(player_name):
         st.image("https://via.placeholder.com/150", width=150)
-        st.subheader("📊 Technical Ratings")
 
+        st.subheader("📊 Technical Ratings")
         categories = ["Passing", "Dribbling", "Shooting", "Heading", "Crossing", "Shot Range"]
-        scores = [st.slider(cat, 0, 10, 5) for cat in categories]
+        scores = [st.slider(cat, 0, 10, 5, key=f"{player_name}_{cat}") for cat in categories]
 
         radar_fig = go.Figure()
         radar_fig.add_trace(go.Scatterpolar(
@@ -97,5 +99,3 @@ with tabs[5]:
     video_description = st.text_area("Video Description")
     if st.button("Upload Video"):
         st.success("Video uploaded (placeholder — not yet connected to storage)")
-
-
