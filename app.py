@@ -1,39 +1,40 @@
-import streamlit as st
+def render_player_panel(player):
+    name = player["Name"]
 
-# --- Streamlit Config ---
-st.set_page_config(page_title="Wosh FC Player Development Tracker", layout="wide")
+    with st.expander(f"{name}'s Panel"):
+        st.subheader(f"🎽 {name} - Player Report")
 
-st.title("⚽ Wosh FC Player Development Tracker")
+        # --- Basic Stats ---
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            goals = st.number_input(f"Goals", min_value=0, key=f"goals_{name}")
+        with col2:
+            assists = st.number_input(f"Assists", min_value=0, key=f"assists_{name}")
+        with col3:
+            saves = st.number_input(f"Saves (if GK)", min_value=0, key=f"saves_{name}")
 
-# --- Function to Render Player Panel ---
-def render_player_panel(name, team):
-    st.subheader(f"{name}'s Panel")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        goals = st.number_input(f"Goals", min_value=0, key=f"{team}_goals_{name}")
-    with col2:
-        assists = st.number_input(f"Assists", min_value=0, key=f"{team}_assists_{name}")
-    with col3:
-        matches = st.number_input(f"Matches Played", min_value=0, key=f"{team}_matches_{name}")
-    st.markdown("---")
+        # --- Ratings ---
+        st.markdown("**🔢 Rate the Player (1-10)**")
+        col4, col5, col6 = st.columns(3)
+        with col4:
+            pace = st.slider("Pace", 1, 10, key=f"pace_{name}")
+        with col5:
+            shooting = st.slider("Shooting", 1, 10, key=f"shooting_{name}")
+        with col6:
+            passing = st.slider("Passing", 1, 10, key=f"passing_{name}")
 
-# --- Players by Team ---
-teams = {
-    "Home": [],
-    "Under 7": ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"],
-    "Under 11": ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"]
-}
+        # --- Area of Improvement ---
+        st.markdown("**🛠️ Area of Improvement**")
+        improvement_area = st.text_area("Write specific areas", key=f"improvement_{name}")
 
-# --- Sidebar Navigation ---
-selected_team = st.sidebar.selectbox("Select Team", list(teams.keys()))
+        # --- Video Analysis Upload ---
+        st.markdown("**🎥 Upload Match Video**")
+        uploaded_video = st.file_uploader("Choose a video file", type=["mp4", "mov"], key=f"video_{name}")
 
-# --- Page Content ---
-if selected_team == "Home":
-    st.markdown("### Welcome to Wosh FC Dashboard 🏠")
-    st.markdown("Use the sidebar to navigate to your team and start tracking development.")
-else:
-    st.header(f"{selected_team} Player Panels")
-    for player in teams[selected_team]:
-        render_player_panel(player, selected_team.replace(" ", "").lower())
-
-
+        # --- Downloadable Report Button (Mocked) ---
+        st.download_button(
+            label="📄 Download Match Report",
+            data=f"{name}'s report\nGoals: {goals}\nAssists: {assists}\nImprovement: {improvement_area}",
+            file_name=f"{name}_match_report.txt",
+            mime="text/plain"
+        )
