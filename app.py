@@ -1,90 +1,100 @@
-
 import streamlit as st
-from PIL import Image
 
 # --- Page Config ---
-st.set_page_config(page_title="Wosh FC Player Development", layout="wide")
+st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
+
+# --- Custom CSS ---
 st.markdown("""
-    <style>
-    body {
-        background-color: #0e1117;
-        color: white;
-        font-family: 'Arial';
-    }
-    .stExpanderHeader {
-        font-size: 18px;
-        font-weight: bold;
-        color: #33ffcc;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.title("⚽ Wosh FC Player Development Tracker")
-st.markdown("From the streets to the stars 🌟")
-
-# --- Tabs ---
-tabs = st.tabs(["Under 7", "Under 11", "Under 14", "Under 15", "Match Analysis", "Video Module"])
-
-# --- Players by Age Group ---
-under_7 = ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"]
-under_11 = ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"]
-under_14 = ["Byron", "Mokaya", "Branton", "Sakwa", "Victor", "Pasi", "Samuel", "Ole", "Samson", "Munene", "Moses", "Godfrey", "Messi Kiptoo", "Elvis Chacha"]
-under_15 = ["Massai", "Brighton", "Ponic", "Mutua", "Turu", "Frank", "Zablon", "Joseph"]
-
-player_groups = {
-    "Under 7": under_7,
-    "Under 11": under_11,
-    "Under 14": under_14,
-    "Under 15": under_15,
+<style>
+/* Background and text */
+body, .stApp {
+    background-color: #0d1117;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-# --- Player Panel without Plotly ---
-def player_panel(player_name):
-    with st.expander(player_name):
-        st.image("https://via.placeholder.com/150", width=150)
+/* Player Card */
+.player-card {
+    background: linear-gradient(145deg, #1f2733, #151a21);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+    transition: transform 0.3s ease;
+    border: 1px solid #2a2f38;
+}
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.6);
+}
 
-        st.subheader("📊 Technical Ratings")
-        col1, col2 = st.columns(2)
-        with col1:
-            passing = st.slider("Passing", 0, 10, 5, key=f"{player_name}_passing")
-            dribbling = st.slider("Dribbling", 0, 10, 5, key=f"{player_name}_dribbling")
-            shooting = st.slider("Shooting", 0, 10, 5, key=f"{player_name}_shooting")
-        with col2:
-            heading = st.slider("Heading", 0, 10, 5, key=f"{player_name}_heading")
-            crossing = st.slider("Crossing", 0, 10, 5, key=f"{player_name}_crossing")
-            shot_range = st.slider("Shot Range", 0, 10, 5, key=f"{player_name}_shotrange")
+/* Stat Bar Container */
+.stat-container {
+    background-color: #2a2f38;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 20px;
+    margin-bottom: 10px;
+}
 
-        st.subheader("📈 Match Stats")
-        st.text("Goals: \nAssists: \nTackles:")
+/* Stat Bar Filler */
+.stat-fill {
+    height: 100%;
+    transition: width 0.5s ease-in-out;
+    border-radius: 10px;
+}
+.passing { background-color: #1abc9c; }
+.shooting { background-color: #e74c3c; }
+.defending { background-color: #3498db; }
 
-        st.subheader("🛠️ Area of Improvement")
-        st.text("- Enter areas here")
+/* Subheaders */
+h2, h3 {
+    color: #f0f6fc;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# --- Populate Each Age Tab ---
-for i, (age_group, players) in enumerate(player_groups.items()):
-    with tabs[i]:
-        st.header(f"{age_group} Squad")
-        for player in players:
-            player_panel(player)
+# --- App Header ---
+st.title("⚽ Wosh FC Analyzer")
+st.markdown("From the streets to the stars 🌟")
 
-# --- Match Analysis ---
-with tabs[4]:
-    st.header("📊 Match Analysis Input")
-    passes = st.number_input("Number of Passes", min_value=0)
-    possession = st.slider("Possession (%)", 0, 100)
-    shots = st.number_input("Shots on Goal", min_value=0)
-    corners = st.number_input("Number of Corners", min_value=0)
-    tackles = st.number_input("Number of Tackles", min_value=0)
-    fouls = st.number_input("Number of Fouls", min_value=0)
-    aerial_duels = st.number_input("Aerial Balls Won", min_value=0)
-    if st.button("Save Match Stats"):
-        st.success("Match stats saved (placeholder — not yet connected to database)")
+# --- Players ---
+players = [
+    {"Name": "Ian", "Position": "Midfielder"},
+    {"Name": "Willy", "Position": "Defender"},
+    {"Name": "Sammy", "Position": "Forward"},
+    {"Name": "Branton", "Position": "Goalkeeper"},
+]
 
-# --- Video Module ---
-with tabs[5]:
-    st.header("🎥 Video Module")
-    video = st.file_uploader("Upload Match Video", type=["mp4", "mov"])
-    video_title = st.text_input("Video Title")
-    video_description = st.text_area("Video Description")
-    if st.button("Upload Video"):
-        st.success("Video uploaded (placeholder — not yet connected to storage)")
+# --- Player Card Renderer ---
+def player_panel(player):
+    player_name = player["Name"]
+    st.markdown(f"<div class='player-card'>", unsafe_allow_html=True)
+    st.markdown(f"<h3>🎯 {player_name} ({player['Position']})</h3>", unsafe_allow_html=True)
+
+    # Sliders
+    passing = st.slider("Passing", 0, 10, 5, key=f"{player_name}_passing")
+    shooting = st.slider("Shooting", 0, 10, 5, key=f"{player_name}_shooting")
+    defending = st.slider("Defending", 0, 10, 5, key=f"{player_name}_defending")
+
+    # Display Stat Bars
+    st.markdown(f"""
+    <div>
+        <div>Passing: {passing}</div>
+        <div class="stat-container"><div class="stat-fill passing" style="width:{passing*10}%"></div></div>
+
+        <div>Shooting: {shooting}</div>
+        <div class="stat-container"><div class="stat-fill shooting" style="width:{shooting*10}%"></div></div>
+
+        <div>Defending: {defending}</div>
+        <div class="stat-container"><div class="stat-fill defending" style="width:{defending*10}%"></div></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)  # close .player-card
+
+# --- Main Section ---
+st.subheader("📋 Player Evaluations")
+for player in players:
+    player_panel(player)
+
