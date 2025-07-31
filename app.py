@@ -1,75 +1,133 @@
+# Wosh FC Visual Dashboard - Python + Streamlit
+# ---------------------------------------------
+# Inspired by PES 2014 / PS2 style with player panels and match stat input.
+
 import streamlit as st
-from PIL import Image
-import pandas as pd
+import random
+from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-# --- App Config ---
-st.set_page_config(page_title="Wosh FC Player Development Dashboard", layout="wide")
+# --- Firebase Setup (requires your serviceAccountKey.json file) ---
+if not firebase_admin._apps:
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
 
-# --- CSS Styling ---
+db = firestore.client()
+
+# --- CONFIG ---
+st.set_page_config(page_title="Wosh FC Dashboard", layout="wide")
+
+# --- STYLES ---
 st.markdown("""
-    <style>
-        body {
-            background-color: #1b1f27;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .player-card {
-            background-color: #2a2f3b;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
-            transition: transform 0.3s ease;
-        }
-        .player-card:hover {
-            transform: scale(1.02);
-        }
-    </style>
+<style>
+    body {
+        background-color: #0d1117;
+        color: white;
+        font-family: 'Arial';
+    }
+    .player-card {
+        background: linear-gradient(145deg, #1f1f1f, #2e2e2e);
+        border-radius: 15px;
+        padding: 1rem;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        text-align: center;
+        color: #ffffff;
+        margin: 10px;
+    }
+    .stat-bar {
+        background: #333;
+        height: 10px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+    .stat-fill {
+        height: 100%;
+        background: #00ff00;
+        border-radius: 5px;
+    }
+</style>
 """, unsafe_allow_html=True)
 
-# --- Player Data Example ---
-under7_players = [
-    {"name": "Fidel", "picture": "", "position": "Forward", "pace": 80, "passing": 75, "shooting": 78, "improvement": "Finishing"},
-    {"name": "Kijokilangs", "picture": "", "position": "Midfielder", "pace": 70, "passing": 82, "shooting": 65, "improvement": "Pace"},
-    {"name": "Kasmall", "picture": "", "position": "Defender", "pace": 65, "passing": 70, "shooting": 50, "improvement": "Positioning"}
-]
+# --- PLAYER DATA ---
+players = {
+    "Under 7": ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"],
+    "Under 11": ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"],
+    "Under 14": ["Byron", "Mokaya", "Branton", "Sakwa", "Victor", "Pasi", "Samuel", "Ole", "Samson", "Munene", "Moses", "Godfrey", "Messi Kiptoo", "Elvis Chacha"],
+    "Under 15": ["Massai", "Brighton", "Ponic", "Mutua", "Turu", "Frank", "Zablon", "Joseph"]
+}
 
-# --- Sidebar Navigation ---
-menu = st.sidebar.selectbox("Select Age Category", ["Under 7", "Under 11", "Under 14", "Under 15", "Match Analysis"])
+# --- FUNCTIONS ---
+def random_stat():
+    return random.randint(30, 100)
 
-# --- Player Panel Function ---
-def show_players(players):
-    for player in players:
-        with st.container():
-            cols = st.columns([1, 3])
-            with cols[0]:
-                st.image("https://via.placeholder.com/150", caption=player["name"], width=100)
-            with cols[1]:
-                st.markdown(f"""
-                    <div class="player-card">
-                        <h3>{player['name']}</h3>
-                        <p><strong>Position:</strong> {player['position']}</p>
-                        <p><strong>Pace:</strong> {player['pace']}</p>
-                        <p><strong>Passing:</strong> {player['passing']}</p>
-                        <p><strong>Shooting:</strong> {player['shooting']}</p>
-                        <p><strong>Area of Improvement:</strong> {player['improvement']}</p>
-                    </div>
-                """, unsafe_allow_html=True)
+def display_player(name, age_group):
+    pic_url = f"https://picsum.photos/seed/{name}/100/100"
+    stats = {"Pace": random_stat(), "Passing": random_stat(), "Shooting": random_stat(), "Defense": random_stat()}
 
-# --- Pages ---
-if menu == "Under 7":
-    st.title("👶 Under 7 Player Development")
-    show_players(under7_players)
+    with st.container():
+        st.markdown(f"""
+        <div class='player-card'>
+            <img src='{pic_url}' width='100' style='border-radius: 50%;'>
+            <h4>{name}</h4>
+            <p><b>Group:</b> {age_group}</p>
+        """, unsafe_allow_html=True)
 
-elif menu == "Match Analysis":
-    st.title("📊 Match Analysis Input")
-    st.text_input("Opponent Team")
-    st.number_input("Number of Passes", min_value=0)
-    st.number_input("Possession %", min_value=0, max_value=100)
-    st.number_input("Shots on Goal", min_value=0)
-    st.number_input("Corners", min_value=0)
-    st.number_input("Tackles", min_value=0)
-    st.file_uploader("Upload Match Video", type=["mp4", "mov", "avi"])
-    st.button("Submit Match Report")
+        for stat, value in stats.items():
+            st.markdown(f"""
+                <div>{stat}: {value}</div>
+                <div class='stat-bar'>
+                    <div class='stat-fill' style='width: {value}%'></div>
+                </div>
+            """, unsafe_allow_html=True)
 
-else:
-    st.title(f"{menu} - Coming Soon")
+        st.markdown("<p><b>Improvement Area:</b> Stamina / Team Play</p></div>", unsafe_allow_html=True)
+
+        # Firebase Save
+        doc_ref = db.collection("players").document(name)
+        doc_ref.set({
+            "name": name,
+            "age_group": age_group,
+            "stats": stats,
+            "updated": datetime.now()
+        })
+
+# --- DISPLAY ---
+st.title("⚽ Wosh FC Player Development Dashboard")
+for group, names in players.items():
+    st.header(f"{group}")
+    cols = st.columns(4)
+    for i, name in enumerate(names):
+        with cols[i % 4]:
+            display_player(name, group)
+
+# --- MATCH ANALYSIS PANEL ---
+st.markdown("---")
+st.subheader("📊 Match Analysis Input")
+match_data = {
+    "Game Date": st.date_input("Match Date"),
+    "Opponent": st.text_input("Opponent Team"),
+    "Goals Scored": st.number_input("Goals Scored", 0),
+    "Goals Conceded": st.number_input("Goals Conceded", 0),
+    "Possession %": st.slider("Possession", 0, 100),
+    "Shots on Target": st.number_input("Shots on Target", 0),
+    "Tackles": st.number_input("Tackles", 0),
+    "Corners": st.number_input("Corners", 0),
+    "Fouls": st.number_input("Fouls", 0),
+    "Notes": st.text_area("Game Notes")
+}
+
+if st.button("📥 Save Match Report"):
+    db.collection("match_reports").add({"data": match_data, "timestamp": datetime.now()})
+    st.success("Saved to Firebase!")
+
+# --- EXPORT SECTION ---
+if st.button("⬇️ Download All Match Reports"):
+    all_reports = db.collection("match_reports").stream()
+    reports_text = ""
+    for r in all_reports:
+        d = r.to_dict()
+        reports_text += f"\n\nDate: {d['data'].get('Game Date')}\nOpponent: {d['data'].get('Opponent')}\nGoals: {d['data'].get('Goals Scored')} - {d['data'].get('Goals Conceded')}\nNotes: {d['data'].get('Notes')}"
+
+    st.download_button("Download Report", reports_text, file_name="woshfc_match_reports.txt")
+
