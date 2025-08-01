@@ -1,46 +1,78 @@
 import streamlit as st
 from datetime import date
 
-# --- App Config ---
+# --- Page Config ---
 st.set_page_config(page_title="Wosh FC Analyzer", layout="wide")
+
+# --- Custom CSS for FIFA-style ---
 st.markdown("""
     <style>
-        body {background-color: #0e1117; color: white;}
+        body {
+            background-color: #0e1117;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .main {
+            padding: 1rem;
+        }
+        h1, h2, h3, h4 {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .stButton>button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        .stSlider > div {
+            background-color: #1e1e1e;
+            padding: 10px;
+            border-radius: 10px;
+        }
         .card {
             background-color: #1e1e1e;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.05);
             margin-bottom: 20px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Home Page ---
-st.title("Wosh FC Analyzer")
-st.markdown("### From the Streets to the Stars 🌟")
+# --- Logo ---
+st.image("/mnt/data/77c67b56-7466-4a56-918e-60ca472a6708.jpeg", width=180)
+
+# --- App Title ---
+st.title("⚽ Wosh FC Analyzer")
+st.markdown("##### _From the Streets to the Stars_ 🌟")
 
 # --- Tactical Identity ---
-st.header("\U0001F3C0 Tactical Identity")
-st.subheader("\U0001F527 Formation: 4-3-3")
+st.header("🎯 Tactical Identity")
+with st.container():
+    st.subheader("🔧 Formation: 4-3-3")
 
-st.markdown("### \U0001F7E2 Build-Up Play")
-st.write("Style:", st.text_input("Build-Up Style", "Slow Build-Up"))
-st.write("Width:", st.text_input("Width", "Balanced"))
-st.write("Key Players:", st.text_area("Key Players (build-up)", "Fullbacks stay back, Midfielders drop deep"))
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("### 🟢 Build-Up")
+        st.write("Style:", st.text_input("Build-Up Style", "Slow Build-Up"))
+        st.write("Width:", st.text_input("Width", "Balanced"))
+        st.write("Key Players:", st.text_area("Build-Up Roles", "Fullbacks stay back, Midfielders drop deep"))
 
-st.markdown("### \U0001F535 Chance Creation")
-st.write("Style:", st.text_input("Chance Creation Style", "Possession"))
-st.write("Support:", st.text_input("Support Type", "Support Runs"))
-st.write("Players in Box:", st.text_input("Players in Box", "Moderate"))
+    with col2:
+        st.markdown("### 🔵 Chance Creation")
+        st.write("Style:", st.text_input("Chance Creation Style", "Possession"))
+        st.write("Support:", st.text_input("Support Type", "Support Runs"))
+        st.write("Players in Box:", st.text_input("Players in Box", "Moderate"))
 
-st.markdown("### \U0001F7E1 Defensive Style")
-st.write("Shape:", st.text_input("Defensive Shape", "Mid Block"))
-st.write("Pressure:", st.text_input("Pressure Trigger", "On Heavy Touch"))
-st.write("Line Height:", st.text_input("Line Height", "Medium"))
+    with col3:
+        st.markdown("### 🟡 Defensive Style")
+        st.write("Shape:", st.text_input("Defensive Shape", "Mid Block"))
+        st.write("Pressure:", st.text_input("Pressure Trigger", "On Heavy Touch"))
+        st.write("Line Height:", st.text_input("Line Height", "Medium"))
 
-st.markdown("### \U0001F4CC Key Notes")
-st.text_area("Tactical Notes", """
+    st.markdown("### 📌 Tactical Notes")
+    st.text_area("Tactical Notes", """
 - Control the tempo of the game
 - Maintain short passing triangles
 - Force mistakes in the midfield
@@ -48,7 +80,7 @@ st.text_area("Tactical Notes", """
 - Wingers drop to receive in buildup
 """)
 
-# --- Player Development Tabs ---
+# --- Sidebar Navigation ---
 under_teams = {
     "Under 7": ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"],
     "Under 11": ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"],
@@ -64,22 +96,24 @@ attribute_list = [
 ]
 
 with st.sidebar:
-    team_tab = st.selectbox("Select Age Group", list(under_teams.keys()) + ["Match Analysis", "Video Module"])
+    team_tab = st.selectbox("🔽 Select Age Group or Module", list(under_teams.keys()) + ["Match Analysis", "Video Module"])
 
+# --- Player Profile Pages ---
 if team_tab in under_teams:
-    st.header(f"{team_tab} Player Profiles")
+    st.header(f"🎒 {team_tab} Player Profiles")
     for player in under_teams[team_tab]:
-        with st.expander(f"{player}"):
-            st.image("https://via.placeholder.com/150", caption=f"{player}'s Picture")
-            st.markdown(f"### Attribute Ratings for {player}")
+        with st.expander(f"🔹 {player}"):
+            st.image("https://via.placeholder.com/150", caption=f"{player}'s Picture", width=150)
+            st.markdown(f"### 🎮 Attribute Ratings for {player}")
             for attr in attribute_list:
                 st.slider(f"{attr} - {player}", 0, 100, 70)
-            st.text_area(f"Area of Improvement - {player}")
-            st.button(f"Save {player}'s Data")
+            st.text_area(f"📌 Area of Improvement - {player}")
+            st.button(f"💾 Save {player}'s Data")
 
+# --- Match Analysis Page ---
 elif team_tab == "Match Analysis":
-    st.header("\U0001F4CA Match Analysis")
-    st.subheader("Team Stats")
+    st.header("📊 Match Analysis")
+    st.subheader("📈 Team Stats")
     possession = st.slider("Possession %", 0, 100, 50)
     passes = st.number_input("Total Passes", 0)
     shots = st.number_input("Total Shots", 0)
@@ -89,7 +123,8 @@ elif team_tab == "Match Analysis":
     heatmap_placeholder = st.text_input("Heat Map Image URL (optional)")
     if heatmap_placeholder:
         st.image(heatmap_placeholder, caption="Heat Map")
-    st.subheader("Individual Player Match Data")
+
+    st.subheader("👤 Individual Player Match Data")
     player_name = st.text_input("Player Name")
     team_name = st.text_input("Team")
     opponent = st.text_input("Opponent")
@@ -105,16 +140,18 @@ elif team_tab == "Match Analysis":
     interceptions = st.number_input("Interceptions", 0)
     fouls = st.number_input("Fouls Committed", 0)
     minutes_played = st.number_input("Minutes Played", 0)
-    st.button("Save Match Data")
+    st.button("💾 Save Match Data")
 
+# --- Video Module Page ---
 elif team_tab == "Video Module":
-    st.header("\U0001F3AC Video Module")
-    video_option = st.radio("Choose Video Input Method", ["Upload", "YouTube Link"])
+    st.header("🎥 Video Module")
+    video_option = st.radio("Select Video Type", ["Upload", "YouTube Link"])
     if video_option == "Upload":
-        video_file = st.file_uploader("Upload Video", type=["mp4", "mov", "avi"])
+        video_file = st.file_uploader("Upload Match Video", type=["mp4", "mov", "avi"])
         if video_file:
             st.video(video_file)
     else:
         video_url = st.text_input("YouTube or Vimeo URL")
         if video_url:
             st.video(video_url)
+
