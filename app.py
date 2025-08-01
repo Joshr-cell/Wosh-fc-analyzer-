@@ -30,18 +30,16 @@ st.markdown("""
             padding: 10px;
             border-radius: 10px;
         }
-        .card {
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.05);
-            margin-bottom: 20px;
-        }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Logo ---
-st.image("/mnt/data/77c67b56-7466-4a56-918e-60ca472a6708.jpeg", width=180)
+# --- Sidebar Logo Upload ---
+st.sidebar.markdown("### 🖼️ Upload Wosh FC Logo")
+logo = st.sidebar.file_uploader("Choose Logo Image", type=["png", "jpg", "jpeg"])
+if logo:
+    st.image(logo, width=180)
+else:
+    st.sidebar.markdown("_No logo uploaded_")
 
 # --- App Title ---
 st.title("⚽ Wosh FC Analyzer")
@@ -80,7 +78,7 @@ with st.container():
 - Wingers drop to receive in buildup
 """)
 
-# --- Sidebar Navigation ---
+# --- Sidebar Team Selector ---
 under_teams = {
     "Under 7": ["Fidel", "Kijokilangs", "Kasmall", "Izo", "Matthew", "Biden", "Ramadhan", "Riya", "David", "Iman", "Moses", "Priest", "Lewis", "Deno"],
     "Under 11": ["Willy", "Evans", "Dan", "Jayjen", "Alvin", "Chacha", "Stivo", "Emmanuel", "Ngesa", "Imani", "John", "Biden"],
@@ -98,19 +96,24 @@ attribute_list = [
 with st.sidebar:
     team_tab = st.selectbox("🔽 Select Age Group or Module", list(under_teams.keys()) + ["Match Analysis", "Video Module"])
 
-# --- Player Profile Pages ---
+# --- Player Profile Section ---
 if team_tab in under_teams:
     st.header(f"🎒 {team_tab} Player Profiles")
     for player in under_teams[team_tab]:
         with st.expander(f"🔹 {player}"):
-            st.image("https://via.placeholder.com/150", caption=f"{player}'s Picture", width=150)
+            player_image = st.file_uploader(f"Upload Photo for {player}", type=["png", "jpg", "jpeg"], key=f"{player}_img")
+            if player_image:
+                st.image(player_image, width=150, caption=f"{player}'s Photo")
+            else:
+                st.markdown("_No image uploaded_")
+
             st.markdown(f"### 🎮 Attribute Ratings for {player}")
             for attr in attribute_list:
                 st.slider(f"{attr} - {player}", 0, 100, 70)
             st.text_area(f"📌 Area of Improvement - {player}")
             st.button(f"💾 Save {player}'s Data")
 
-# --- Match Analysis Page ---
+# --- Match Analysis Tab ---
 elif team_tab == "Match Analysis":
     st.header("📊 Match Analysis")
     st.subheader("📈 Team Stats")
@@ -142,7 +145,7 @@ elif team_tab == "Match Analysis":
     minutes_played = st.number_input("Minutes Played", 0)
     st.button("💾 Save Match Data")
 
-# --- Video Module Page ---
+# --- Video Module Tab ---
 elif team_tab == "Video Module":
     st.header("🎥 Video Module")
     video_option = st.radio("Select Video Type", ["Upload", "YouTube Link"])
@@ -154,4 +157,3 @@ elif team_tab == "Video Module":
         video_url = st.text_input("YouTube or Vimeo URL")
         if video_url:
             st.video(video_url)
-
