@@ -104,28 +104,28 @@ else:
     st.sidebar.markdown("_No logo uploaded_")
 
 # --- Title ---
-st.title("\u26bd Wosh FC Analyzer")
-st.markdown("##### _From the Streets to the Stars_ \ud83c\udf1f")
+st.title("⚽ Wosh FC Analyzer")
+st.markdown("##### _From the Streets to the Stars_ 🌟")
 
 # --- Tactical Section ---
-st.header("\ud83c\udfaf Tactical Identity")
+st.header("🎯 Tactical Identity")
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.subheader("\ud83d\udfe2 Build-Up")
+    st.subheader("🟢 Build-Up")
     st.text_input("Build-Up Style", "Slow Build-Up")
     st.text_input("Width", "Balanced")
     st.text_area("Key Roles", "Fullbacks stay back, Midfielders drop deep")
 with col2:
-    st.subheader("\ud83d\udd35 Chance Creation")
+    st.subheader("🔵 Chance Creation")
     st.text_input("Chance Creation Style", "Possession")
     st.text_input("Support Type", "Support Runs")
     st.text_input("Players in Box", "Moderate")
 with col3:
-    st.subheader("\ud83d\udfe1 Defense")
+    st.subheader("🟡 Defense")
     st.text_input("Shape", "Mid Block")
     st.text_input("Pressure Trigger", "On Heavy Touch")
     st.text_input("Line Height", "Medium")
-st.text_area("\ud83d\udccc Tactical Notes", """
+st.text_area("📌 Tactical Notes", """
 - Control the tempo of the game
 - Maintain short passing triangles
 - Force mistakes in the midfield
@@ -140,9 +140,9 @@ tab = st.sidebar.selectbox("Select Age Group", list(teams.keys()))
 
 # --- Player Panels ---
 if tab in teams:
-    st.header(f"\ud83c\udf93 {tab} Player Profiles")
+    st.header(f"🎓 {tab} Player Profiles")
     for player in teams[tab]:
-        with st.expander(f"\u25b6\ufe0f {player}"):
+        with st.expander(f"▶️ {player}"):
             key = f"{tab}_{player}"
             if key not in st.session_state.player_data:
                 st.session_state.player_data[key] = {"stats": {}, "notes": ""}
@@ -152,13 +152,13 @@ if tab in teams:
             st.session_state.player_data[key]["notes"] = st.text_area(f"Notes - {player}")
 
     # Save Button with Spinner
-    if st.button("\ud83d\udd10 Save All Players"):
+    if st.button("🔐 Save All Players"):
         with st.spinner("Saving all data..."):
-            time.sleep(2)  # simulate save delay
+            time.sleep(2)
         st.success("All player data saved!")
 
 # --- Floating Save Button CSV ---
-if st.button("\ud83d\udcc5 Export to CSV"):
+if st.button("📅 Export to CSV"):
     rows = []
     for k, v in st.session_state.player_data.items():
         name = k.split("_")[1]
@@ -166,5 +166,5 @@ if st.button("\ud83d\udcc5 Export to CSV"):
         rows.append(row)
     df = pd.DataFrame(rows)
     csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button("\ud83d\udcc4 Download CSV", csv, "wosh_fc_data.csv", "text/csv")
+    st.download_button("📄 Download CSV", csv, "wosh_fc_data.csv", "text/csv")
 
